@@ -8,20 +8,16 @@
                 <h2>{{error}}</h2>
 
                 <table class = "table table-striped">
-                    <tr>
-                        <th>itemID</th>
-                        <th>Price</th>
-                        <th>Quantity</th>
-                        <th>Name</th>
-                        <th>Location</th>
 
-
-
-                    </tr>
                     {% for message in get_flashed_messages() %}
+                    
                     <tr>
                         {% for i in message %}
-                            <td>{{i}}</td>
+                            {%if loop.first %}
+                                <th>{{i}}</th>
+                            {% else %}
+                                <td>{{i}}</td>
+                            {% endif %}
                         {% endfor %}
                     </tr>
                     {% endfor %}

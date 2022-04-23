@@ -76,7 +76,10 @@ def renderFormResults(sql):
     error = ""
     results = runSQLCommand(sql)
 
+    cursorFields = [i[0] for i in cursor.description]
     if(results != None):
+        
+        flash(cursorFields)
         for info in results:
             flash(info)
     else:
@@ -99,13 +102,16 @@ def findItemPost():
     
     #We need itemID to be something or else the SQL is an error.
     #itemID is always inputed as positive, so we can give -1.
-    if(itemID == ""):
+    if(itemID == "" or isinstance(itemID,str)):
         itemID = '-1'
     
     return renderFormResults("SELECT * FROM ITEM WHERE itemName = '" + itemName + "' OR itemID = " + itemID + ";")
     
 
+@app.route("/employeeList")
+def employeeList():
 
+    return renderFormResults("Select * FROM EMPLOYEE");
 
  
 @app.route("/createDatabase")
