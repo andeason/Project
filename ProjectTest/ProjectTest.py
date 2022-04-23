@@ -1,7 +1,8 @@
-import os
 import mysql.connector
 from flask import Flask, render_template,request,redirect, session,flash
 import re
+
+
 
 
 
@@ -16,31 +17,26 @@ try:
         );
 
 except mysql.connector.Error as err:
-    print(mysql.connector.Error)
     print("An error occurred connecting to the database.")
     print("This is likely due to the username and password being incorrect")
     print("Please verify that the mydb's username and password are correct in ProjectTest and retry")
     quit()
 
-
-
-
 cursor = mydb.cursor()
 app = Flask(__name__)
 app.secret_key = "SJKaslkjdj12kldsal21"
 
-#Since the table might not have been created, this serves to automatically select the table for this situation.
-try:
-    cursor.execute("use project;")
-    print("Project exists.  Going as planned")
-except mysql.connector.Error as err:
-    print("The project database has not been created yet!")
-    print("Before running any commands, please run the button 'only click if initalizing'")
 
+
+def runSQLCommand(sql):
+    try:
+        cursor.execute(sql)
+        return cursor.fetchall()
+    except mysql.connector.Error as err:
+        print(err)
 
 
 @app.route("/")
-@app.route("/index")
 def main_page(name=None):
     return render_template("main.html")
 
@@ -73,18 +69,45 @@ def findItems():
     return render_template("findItems.html")
 
 
+
+
+def renderFormResults(sql):
+    
+    error = ""
+    results = runSQLCommand(sql)
+
+    if(results != None):
+        for info in results:
+            flash(info)
+    else:
+        error="No output obtained from the search"
+    
+    return render_template("formResults.html",error=error)
+
+
+
 @app.route("/showItems")
 def showItems():
-    sql = "SELECT * FROM item;"
 
-    cursor.execute(sql)
-    results = cursor.fetchall()
+    return renderFormResults("SELECT * FROM item;")
 
-    for info in results:
-        flash(info)
+@app.route("/findItemPost",methods=["POST"])
+def findItemPost():
 
-    return render_template("showItems.html")
+    itemName = request.form["iName"]
+    itemID = request.form["iID"]
     
+    #We need itemID to be something or else the SQL is an error.
+    #itemID is always inputed as positive, so we can give -1.
+    if(itemID == ""):
+        itemID = '-1'
+    
+    return renderFormResults("SELECT * FROM ITEM WHERE itemName = '" + itemName + "' OR itemID = " + itemID + ";")
+    
+
+
+
+ 
 @app.route("/createDatabase")
 def createDatabase():
     return render_template("createDatabase.html")
@@ -93,6 +116,7 @@ def createDatabase():
 def initializeDatabase():
     global cursor
     statement = ""
+
     for line in open('projectScript.sql'):
         #This is gonna take some time to implemenet.
         if not (re.search(r';$',line)):
@@ -124,19 +148,13 @@ def loginPost():
     password = request.form["usPass"]
     error = None
 
-    print("Preparing for query")
-    sql = "SELECT FirstName, LastName,position FROM EMPLOYEE e JOIN loginInformation d ON d.EmployeeID = e.EmployeeID WHERE '" + username + "' = username AND '"+ password+"' = pssword;"
-    cursor.execute(sql)
-
-    results = cursor.fetchall()
-    #Grab information deliniating between a manager and a stocker.
+    results = runSQLCommand("SELECT FirstName, LastName,position FROM EMPLOYEE e JOIN loginInformation d ON d.EmployeeID = e.EmployeeID WHERE '" + username + "' = username AND '"+ password+"' = pssword;")
    
-
-    print(results)
     if(len(results) == 0):
        error = "Invalid login info! Please re-enter login information"
        return render_template("login.html",error=error)
 
+    
     session['loginInfo'] = results[0][2]
 
     if(results[0][2] == "manager"):
@@ -144,8 +162,30 @@ def loginPost():
     elif(results[0][2] == "stocker"):
         return redirect("/stockerMain")
     else:
-        error = "Invalid login information"
         return render_template("login.html",error=error)
+
+
+
+
+@app.route("/totalSales/<string:mode>")
+def totalSales(mode="month"):
+
+    #to ensure it is easy to loop for the html, we will order the results by the month.
+    sql = "SELECT SUM(e.boughtAmount) * p.price  AS MONTHINCOME, d." + mode + "Transacted FROM receiptBought e"
+    sql += " JOIN RECEIPT d ON e.ReceiptID = d.RECEIPTID JOIN item p ON p.itemID = e.itemID GROUP BY d." + mode + "Transacted ORDER BY " + mode + "Transacted ASC;"
+    
+    print(sql)
+    results = runSQLCommand(sql)
+    if(results != None):
+        for info in results:
+            flash(info)
+    else:
+        error="No output obtained from the search"
+    
+    return render_template("totalsales.html",mode=mode)
+
+
+
 
 
 

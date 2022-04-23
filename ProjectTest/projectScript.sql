@@ -89,14 +89,30 @@ INSERT INTO EMPLOYEE(FirstName,LastName,workLocation,ManagerID,position) VALUES 
 INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(17,100,30,"front","3KG PEANUTS");
 INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(21,15,200,"back","MEDSHIRT");
 INSERT INTO ITEM(itemID, price, quantity,location, itemName) VALUES(86,4,1000,"middle","APPLES");
+INSERT INTO ITEM(itemID, price, quantity,location, itemName) VALUES(25,5,0,"BACK","ORANGES");
+INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(40,16,2,"FRONT","RADIOACTIVE WASTE");
 
 INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(17,"allergies","Dont let this be exposed to those with allergies");
+INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(40,"Radiation","Even if you are a Cancer, you probably dont WANT Cancer");
+INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(40,"Toxic","Dont let near others.");
 
-INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES (912, 3,8,21);
+
+INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES (912, 3,8,12);
+INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES(913,2,8,8);
+INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES(914,2,9,8);
+INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES(1012,7,12,9);
 
 
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (912,17,40);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (912,17,2);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (912,86,1000);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (913,17,8);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (913,21,10);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (913,25,423);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (914,17,1);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (914,21,75);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (914,25,3);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (1012,40,10000);
 
 INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES (15,7,12,3,1);
 
