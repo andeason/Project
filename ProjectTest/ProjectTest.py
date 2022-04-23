@@ -61,6 +61,7 @@ def stockerMain():
 def logout():
 
     session.pop('loginInfo', default=None)
+    session.pop('employeeID',default=None)
     return redirect("/")
 
 
@@ -113,6 +114,10 @@ def employeeList():
 
     return renderFormResults("Select * FROM EMPLOYEE");
 
+@app.route("/myEmployees")
+def myEmployees():
+
+    return renderFormResults("SELECT * FROM EMPLOYEE WHERE ManagerID = " + str(session["employeeID"]) + ";")
  
 @app.route("/createDatabase")
 def createDatabase():
@@ -154,7 +159,7 @@ def loginPost():
     password = request.form["usPass"]
     error = None
 
-    results = runSQLCommand("SELECT FirstName, LastName,position FROM EMPLOYEE e JOIN loginInformation d ON d.EmployeeID = e.EmployeeID WHERE '" + username + "' = username AND '"+ password+"' = pssword;")
+    results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID FROM EMPLOYEE e JOIN loginInformation d ON d.EmployeeID = e.EmployeeID WHERE '" + username + "' = username AND '"+ password+"' = pssword;")
    
     if(len(results) == 0):
        error = "Invalid login info! Please re-enter login information"
@@ -162,6 +167,7 @@ def loginPost():
 
     
     session['loginInfo'] = results[0][2]
+    session['employeeID'] = results[0][3]
 
     if(results[0][2] == "manager"):
         return redirect("/managerMain")
@@ -189,6 +195,7 @@ def totalSales(mode="month"):
         error="No output obtained from the search"
     
     return render_template("totalsales.html",mode=mode)
+
 
 
 
