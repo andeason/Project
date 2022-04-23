@@ -80,7 +80,7 @@ def findEmployeePost():
     
     #We need itemID to be something or else the SQL is an error.
     #itemID is always inputed as positive, so we can give -1.
-    if(employeeID == "" or isinstance(itemID,str)):
+    if(employeeID == "" or isinstance(employeeID,str)):
         employeeID = '-1'
     
     return renderFormResults("SELECT * FROM EMPLOYEE WHERE firstName = '" + employeeName + "' OR employeeID = " + employeeID + ";")
@@ -92,14 +92,21 @@ def renderFormResults(sql):
     error = ""
     results = runSQLCommand(sql)
 
-    cursorFields = [i[0] for i in cursor.description]
-    if(results != None):
-        
-        flash(cursorFields)
-        for info in results:
-            flash(info)
-    else:
-        error="No output obtained from the search"
+
+    #TODO:  Change executeMYSQL to have two other functions.  
+    #These can better be able to handle errors and not require catching problems twice
+    try:
+        cursorFields = [i[0] for i in cursor.description]
+        if(results != None):
+            
+            flash(cursorFields)
+            for info in results:
+                flash(info)
+        else:
+            error="No output obtained from the search"
+    except Exception as e:
+        print(e)
+
     
     return render_template("formResults.html",error=error)
 
