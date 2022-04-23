@@ -69,6 +69,21 @@ def logout():
 def findItems():
     return render_template("findItems.html")
 
+@app.route("/findEmployees")
+def findEmployees():
+    return render_template("findEmployees.html")
+
+@app.route("/findEmployeePost",methods=["POST"])
+def findEmployeePost():
+    employeeName = request.form["eName"]
+    employeeID = request.form["eID"]
+    
+    #We need itemID to be something or else the SQL is an error.
+    #itemID is always inputed as positive, so we can give -1.
+    if(employeeID == "" or isinstance(itemID,str)):
+        employeeID = '-1'
+    
+    return renderFormResults("SELECT * FROM EMPLOYEE WHERE firstName = '" + employeeName + "' OR employeeID = " + employeeID + ";")
 
 
 
