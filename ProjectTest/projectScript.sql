@@ -85,6 +85,9 @@ INSERT INTO EMPLOYEE(EmployeeID,FirstName,LastName,position) VALUES (1,"Johnny",
 INSERT INTO EMPLOYEE(FirstName,LastName,workLocation,ManagerID,position) VALUES ("Babe", "Truth","Front",1,"stocker");
 INSERT INTO EMPLOYEE(FirstName,LastName,workLocation,ManagerID,position) VALUES ("Lanna", "Loanna","Back",1,"stocker");
 INSERT INTO EMPLOYEE(FirstName,LastName,workLocation,ManagerID,position) VALUES ("Hefty", "Creft","Middle",1,"stocker");
+INSERT INTO EMPLOYEE(EMPLOYEEID,FirstName,LastName,position) VALUES (5,"Clutch","Cargo","manager");
+INSERT INTO EMPLOYEE(FirstName,LastName,workLocation,ManagerID,position) VALUES ("Emmanual", "GoldStein","Middle",5,"stocker");
+INSERT INTO EMPLOYEE(FirstName,LastName,workLocation,ManagerID,position) VALUES ("Winston", "Smith","Front",5,"stocker");
 
 INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(17,100,30,"front","3KG PEANUTS");
 INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(21,15,200,"back","MEDSHIRT");
