@@ -136,6 +136,15 @@ def employeeList():
 
     return renderFormResults("Select * FROM EMPLOYEE");
 
+@app.route("/showOrders")
+def showOrders():
+    return renderFormResults("Select * FROM ORDERS")
+
+@app.route("/showReceipts")
+def showReceipts():
+    return renderFormResults("Select * FROM RECEIPT")
+
+
 @app.route("/myEmployees")
 def myEmployees():
 
@@ -217,7 +226,6 @@ def totalSales(mode="month"):
         error="No output obtained from the search"
     
     return render_template("totalsales.html",mode=mode)
-
 
 
 
