@@ -117,10 +117,20 @@ INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (914,21,75);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (914,25,3);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (1012,40,10000);
 
-INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES (15,7,12,3,1);
+INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(15,7,12,3,1);
+INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(16,9,11,2,5);
+INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(17,10,1,4,1);
+INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(18,8,3,4,5)
 
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(15,17,200);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(15,86,400);
+INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(16,40,500);
+INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(16,21,30);
+INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(16,17,687);
+INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(17,25,999);
+INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,21,36);
+INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,86,400);
+
 
 
 CREATE TABLE LoginInformation
