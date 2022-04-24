@@ -86,10 +86,6 @@ def employeeList():
 
     return renderFormResults("Select * FROM EMPLOYEE");
 
-@app.route("/showOrders")
-def showOrders():
-    return renderFormResults("Select * FROM ORDERS")
-
 @app.route("/myEmployees")
 def myEmployees():
 
@@ -205,6 +201,14 @@ def loginPost():
 
 
 
+@app.route("/showOrders/<string:mode>")
+def showOrders(mode="ORDERID",filepath="showOrders"):
+
+    sql = "SELECT b.OrderID as ORDERID, SUM(b.orderAmount * d.price) as TOTALCOST, e.managerID as MANAGERID, p.firstName, p.lastName, e.hrTransacted, e.dayTransacted, e.monthTransacted FROM itemorder b"
+    sql += " JOIN item d on d.itemID = b.itemID JOIN orders e ON e.OrderID = b.OrderID JOIN employee p on e.managerID = p.employeeID GROUP BY ORDERID ORDER BY " + mode + " DESC;"
+
+    return renderFormResults(sql,modes = ["ORDERID","TOTALCOST","MANAGERID"],filepath=filepath)
+
 @app.route("/totalSales/<string:mode>")
 def totalSales(mode="month",filepath="totalSales"):
 
@@ -212,7 +216,7 @@ def totalSales(mode="month",filepath="totalSales"):
     sql = "SELECT SUM(e.boughtAmount) * p.price  AS MONTHINCOME, d." + mode + "Transacted FROM receiptBought e"
     sql += " JOIN RECEIPT d ON e.ReceiptID = d.RECEIPTID JOIN item p ON p.itemID = e.itemID GROUP BY d." + mode + "Transacted ORDER BY " + mode + "Transacted ASC;"
     
-    return renderFormResults(sql,modes = [["hr","day","month"]],filepath=filepath)
+    return renderFormResults(sql,modes = ["hr","day","month"],filepath=filepath)
 
 @app.route("/showReceipts/<string:mode>")
 def showReceipts(mode="receiptID",filepath="showReceipts"):
@@ -222,6 +226,13 @@ def showReceipts(mode="receiptID",filepath="showReceipts"):
     sql += " JOIN item d on d.itemID = b.itemID JOIN receipt e ON e.receiptID = b.receiptID GROUP BY RECEIPTID ORDER BY " + mode + " DESC;"
 
     return renderFormResults(sql,modes = ["RECEIPTID","TOTALSALES"],filepath=filepath)
+
+@app.route("/netInventory/<string:mode>")
+def netInventory(mode="ITEM", filepath="netInventory"):
+
+    sql = "select p.itemName as ITEM, SUM(b.orderAmount) - SUM(r.boughtAmount) as  NETITEMSGAINED, SUM(r.boughtAmount) * p.price - SUM(b.orderAmount) * p.price as NETGAIN FROM item p LEFT JOIN itemorder b ON b.itemID = p.itemID LEFT JOIN receiptBought r ON p.itemID = r.itemID GROUP BY ITEM ORDER BY " + mode + " DESC;"
+    
+    return renderFormResults(sql,modes = ["ITEM","NETITEMSGAINED","NETGAIN"],filepath=filepath)
 
 
 

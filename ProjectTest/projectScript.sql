@@ -94,6 +94,7 @@ INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(21,15,200,"ba
 INSERT INTO ITEM(itemID, price, quantity,location, itemName) VALUES(86,4,1000,"middle","APPLES");
 INSERT INTO ITEM(itemID, price, quantity,location, itemName) VALUES(25,5,0,"BACK","ORANGES");
 INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(40,16,2,"FRONT","RADIOACTIVE WASTE");
+INSERT INTO ITEM(itemID, price, quantity, location, itemName) VALUES(234,400,20,"BACK","TV");
 
 INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(17,"allergies","Dont let this be exposed to those with allergies");
 INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(40,"Radiation","Even if you are a Cancer, you probably dont WANT Cancer");
@@ -120,7 +121,7 @@ INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (1012,40,10000
 INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(15,7,12,3,1);
 INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(16,9,11,2,5);
 INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(17,10,1,4,1);
-INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(18,8,3,4,5)
+INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(18,8,3,4,5);
 
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(15,17,200);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(15,86,400);
