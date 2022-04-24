@@ -1,0 +1,54 @@
+{%extends "base.html" %}
+
+{%block content%}
+
+        <div class="info">
+            
+
+            {% if session['loginInfo'] == "manager" %}
+                <h1>Here are the following currently in the system:</h1>
+
+
+
+                <h2>{{error}}</h2>
+
+                <table class = "table table-striped">
+
+                    {% for message in get_flashed_messages() %}
+                    
+                    <tr>
+                        {% for i in message %}
+                            {%if loop.first %}
+                                <th>{{i}}</th>
+                            {% else %}
+                                <td>{{i}}</td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </table>
+
+
+                    
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Change Mode
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                      <a class="dropdown-item" href="/showReceipts/RECEIPTID">by ReceiptID</a>
+                      <a class="dropdown-item" href="/showReceipts/TOTALSALES">by totalSales</a>
+                    </div>
+                  </div>
+
+                  <a href="/managerMain" class="btn btn btn-dark" act>Return to Manager Page</a>
+            {% else %}
+                <h1>Access Denied</h1>
+
+                <p>Please return to the main page.</p>
+
+                <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
+            {% endif %}
+        </div>
+
+
+{%endblock%}

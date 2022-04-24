@@ -3,24 +3,20 @@ from flask import Flask, render_template,request,redirect, session,flash
 import re
 
 
-
-
-
 mydb = None
+
 try:
-
     mydb = mysql.connector.connect(
-        host = "localhost",
-        user = "root",
-        password = "password",
-        db = "project"
-        );
-
+        host="127.0.0.1",
+        user="root",
+        password="password",
+        db="project"
+    );
 except mysql.connector.Error as err:
-    print("An error occurred connecting to the database.")
-    print("This is likely due to the username and password being incorrect")
-    print("Please verify that the mydb's username and password are correct in ProjectTest and retry")
+    print(err)
+    print("Please verify that the user, password, and host is correct and fix.")
     quit()
+
 
 cursor = mydb.cursor()
 app = Flask(__name__)
@@ -34,56 +30,6 @@ def runSQLCommand(sql):
         return cursor.fetchall()
     except mysql.connector.Error as err:
         print(err)
-
-
-@app.route("/")
-def main_page(name=None):
-    return render_template("main.html")
-
-
-@app.route("/login")
-def login():
-    error = ""
-    return render_template("login.html",error=error)
-
-
-@app.route("/managerMain")
-def managerMain():
-     return render_template("managerMain.html")
-
-
-@app.route("/stockerMain")
-def stockerMain():
-     return render_template("stockerMain.html")
-
-
-@app.route("/logout")
-def logout():
-
-    session.pop('loginInfo', default=None)
-    session.pop('employeeID',default=None)
-    return redirect("/")
-
-
-@app.route("/findItems")
-def findItems():
-    return render_template("findItems.html")
-
-@app.route("/findEmployees")
-def findEmployees():
-    return render_template("findEmployees.html")
-
-@app.route("/findEmployeePost",methods=["POST"])
-def findEmployeePost():
-    employeeName = request.form["eName"]
-    employeeID = request.form["eID"]
-    
-    #We need itemID to be something or else the SQL is an error.
-    #itemID is always inputed as positive, so we can give -1.
-    if(employeeID == "" or isinstance(employeeID,str)):
-        employeeID = '-1'
-    
-    return renderFormResults("SELECT * FROM EMPLOYEE WHERE firstName = '" + employeeName + "' OR employeeID = " + employeeID + ";")
 
 
 
@@ -112,6 +58,68 @@ def renderFormResults(sql):
 
 
 
+@app.route("/")
+def main_page(name=None):
+    return render_template("main.html")
+
+
+@app.route("/login")
+def login():
+    error = ""
+    return render_template("login.html",error=error)
+
+
+@app.route("/managerMain")
+def managerMain():
+     return render_template("managerMain.html")
+
+
+@app.route("/stockerMain")
+def stockerMain():
+     return render_template("stockerMain.html")
+
+@app.route("/employeeList")
+def employeeList():
+
+    return renderFormResults("Select * FROM EMPLOYEE");
+
+@app.route("/showOrders")
+def showOrders():
+    return renderFormResults("Select * FROM ORDERS")
+
+@app.route("/myEmployees")
+def myEmployees():
+
+    return renderFormResults("SELECT * FROM EMPLOYEE WHERE ManagerID = " + str(session["employeeID"]) + ";")
+
+@app.route("/logout")
+def logout():
+
+    session.pop('loginInfo', default=None)
+    session.pop('employeeID',default=None)
+    return redirect("/")
+
+@app.route("/findItems")
+def findItems():
+    return render_template("findItems.html")
+
+@app.route("/findEmployees")
+def findEmployees():
+    return render_template("findEmployees.html")
+
+@app.route("/findEmployeePost",methods=["POST"])
+def findEmployeePost():
+    employeeName = request.form["eName"]
+    employeeID = request.form["eID"]
+    
+    #We need itemID to be something or else the SQL is an error.
+    #itemID is always inputed as positive, so we can give -1.
+    if(employeeID == "" or isinstance(employeeID,str)):
+        employeeID = '-1'
+    
+    return renderFormResults("SELECT * FROM EMPLOYEE WHERE firstName = '" + employeeName + "' OR employeeID = " + employeeID + ";")
+
+
 @app.route("/showItems")
 def showItems():
 
@@ -131,24 +139,8 @@ def findItemPost():
     return renderFormResults("SELECT * FROM ITEM WHERE itemName = '" + itemName + "' OR itemID = " + itemID + ";")
     
 
-@app.route("/employeeList")
-def employeeList():
+@app.route("/orderItems")
 
-    return renderFormResults("Select * FROM EMPLOYEE");
-
-@app.route("/showOrders")
-def showOrders():
-    return renderFormResults("Select * FROM ORDERS")
-
-@app.route("/showReceipts")
-def showReceipts():
-    return renderFormResults("Select * FROM RECEIPT")
-
-
-@app.route("/myEmployees")
-def myEmployees():
-
-    return renderFormResults("SELECT * FROM EMPLOYEE WHERE ManagerID = " + str(session["employeeID"]) + ";")
  
 @app.route("/createDatabase")
 def createDatabase():
@@ -217,7 +209,6 @@ def totalSales(mode="month"):
     sql = "SELECT SUM(e.boughtAmount) * p.price  AS MONTHINCOME, d." + mode + "Transacted FROM receiptBought e"
     sql += " JOIN RECEIPT d ON e.ReceiptID = d.RECEIPTID JOIN item p ON p.itemID = e.itemID GROUP BY d." + mode + "Transacted ORDER BY " + mode + "Transacted ASC;"
     
-    print(sql)
     results = runSQLCommand(sql)
     if(results != None):
         for info in results:
@@ -226,6 +217,28 @@ def totalSales(mode="month"):
         error="No output obtained from the search"
     
     return render_template("totalsales.html",mode=mode)
+
+@app.route("/showReceipts/<string:mode>")
+def showReceipts(mode="receiptID"):
+
+
+    sql = "SELECT b.receiptID as RECEIPTID, SUM(b.boughtAmount * d.price) as TOTALSALES, e.hrTransacted, e.dayTransacted, e.monthTransacted FROM receiptBought b"
+    sql += " JOIN item d on d.itemID = b.itemID JOIN receipt e ON e.receiptID = b.receiptID GROUP BY RECEIPTID ORDER BY " + mode + " DESC;"
+
+    results = runSQLCommand(sql)
+    cursorFields = [i[0] for i in cursor.description]
+    try:
+        if(results != None):
+            flash(cursorFields)
+            for info in results:
+                flash(info)
+        else:
+            error="No output obtained from the search"
+    except Exception as err:
+        print(err)
+
+
+    return render_template("showReceipts.html",mode=mode)
 
 
 
