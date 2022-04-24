@@ -33,9 +33,12 @@ def runSQLCommand(sql):
 
 
 
-def renderFormResults(sql):
+#hasMode defines if we have multiple views that we wish to change the form to be in
+def renderFormResults(sql,modes = None,filepath = None):
     
     error = ""
+
+
     results = runSQLCommand(sql)
 
 
@@ -53,8 +56,12 @@ def renderFormResults(sql):
     except Exception as e:
         print(e)
 
+    if(modes!=None):
+        for i in modes:
+            flash(i)
+
     
-    return render_template("formResults.html",error=error)
+    return render_template("formResults.html",error=error, mode=(modes!=None), filepath=filepath)
 
 
 
@@ -203,42 +210,22 @@ def loginPost():
 
 
 @app.route("/totalSales/<string:mode>")
-def totalSales(mode="month"):
+def totalSales(mode="month",filepath="totalSales"):
 
     #to ensure it is easy to loop for the html, we will order the results by the month.
     sql = "SELECT SUM(e.boughtAmount) * p.price  AS MONTHINCOME, d." + mode + "Transacted FROM receiptBought e"
     sql += " JOIN RECEIPT d ON e.ReceiptID = d.RECEIPTID JOIN item p ON p.itemID = e.itemID GROUP BY d." + mode + "Transacted ORDER BY " + mode + "Transacted ASC;"
     
-    results = runSQLCommand(sql)
-    if(results != None):
-        for info in results:
-            flash(info)
-    else:
-        error="No output obtained from the search"
-    
-    return render_template("totalsales.html",mode=mode)
+    return renderFormResults(sql,modes = [["hr","day","month"]],filepath=filepath)
 
 @app.route("/showReceipts/<string:mode>")
-def showReceipts(mode="receiptID"):
+def showReceipts(mode="receiptID",filepath="showReceipts"):
 
 
     sql = "SELECT b.receiptID as RECEIPTID, SUM(b.boughtAmount * d.price) as TOTALSALES, e.hrTransacted, e.dayTransacted, e.monthTransacted FROM receiptBought b"
     sql += " JOIN item d on d.itemID = b.itemID JOIN receipt e ON e.receiptID = b.receiptID GROUP BY RECEIPTID ORDER BY " + mode + " DESC;"
 
-    results = runSQLCommand(sql)
-    cursorFields = [i[0] for i in cursor.description]
-    try:
-        if(results != None):
-            flash(cursorFields)
-            for info in results:
-                flash(info)
-        else:
-            error="No output obtained from the search"
-    except Exception as err:
-        print(err)
-
-
-    return render_template("showReceipts.html",mode=mode)
+    return renderFormResults(sql,modes = [["RECEIPTID","TOTALSALES"]],filepath=filepath)
 
 
 
