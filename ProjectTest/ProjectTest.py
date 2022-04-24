@@ -234,6 +234,12 @@ def netInventory(mode="ITEM", filepath="netInventory"):
     
     return renderFormResults(sql,modes = ["ITEM","NETITEMSGAINED","NETGAIN"],filepath=filepath)
 
+@app.route("/managerItemsOrdered/<string:mode>")
+def managerTotalOrders(mode="TOTALITEMORDERS", filepath="managerItemsOrdered"):
+    sql = "SELECT o.managerID, e.firstName as FIRSTNAME, e.lastName, SUM(i.orderAmount) as TOTALITEMORDERS, SUM(i.orderAmount * p.price) as TOTALCOST FROM orders o JOIN employee e ON o.managerID = e.employeeID JOIN itemOrder i ON o.orderID = i.orderID JOIN item p ON p.itemID = i.itemID GROUP BY o.managerID ORDER BY " + mode + " DESC;"
+
+    return renderFormResults(sql, modes=["TOTALITEMORDERS","TOTALCOST","FIRSTNAME"],filepath=filepath)
+
 
 
 
