@@ -1,5 +1,5 @@
 import mysql.connector
-from flask import Flask, render_template,request,redirect, session,flash
+from flask import Flask, render_template,request,redirect, session,flash,jsonify
 import re
 
 
@@ -37,8 +37,6 @@ def runSQLCommand(sql):
 def renderFormResults(sql,modes = None,filepath = None):
     
     error = ""
-
-
     results = runSQLCommand(sql)
 
 
@@ -56,12 +54,10 @@ def renderFormResults(sql,modes = None,filepath = None):
     except Exception as e:
         print(e)
 
-    if(modes!=None):
-        for i in modes:
-            flash(i)
+
 
     
-    return render_template("formResults.html",error=error, mode=(modes!=None), filepath=filepath)
+    return render_template("formResults.html",error=error, modes=modes, filepath=filepath)
 
 
 
@@ -225,7 +221,7 @@ def showReceipts(mode="receiptID",filepath="showReceipts"):
     sql = "SELECT b.receiptID as RECEIPTID, SUM(b.boughtAmount * d.price) as TOTALSALES, e.hrTransacted, e.dayTransacted, e.monthTransacted FROM receiptBought b"
     sql += " JOIN item d on d.itemID = b.itemID JOIN receipt e ON e.receiptID = b.receiptID GROUP BY RECEIPTID ORDER BY " + mode + " DESC;"
 
-    return renderFormResults(sql,modes = [["RECEIPTID","TOTALSALES"]],filepath=filepath)
+    return renderFormResults(sql,modes = ["RECEIPTID","TOTALSALES"],filepath=filepath)
 
 
 
