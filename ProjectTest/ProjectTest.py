@@ -29,7 +29,7 @@ def runSQLCommand(sql):
         cursor.execute(sql)
         return cursor.fetchall()
     except mysql.connector.Error as err:
-        print(err)
+        raise err
 
 
 
@@ -77,9 +77,14 @@ def managerMain():
      return render_template("managerMain.html")
 
 
+
 @app.route("/stockerMain")
 def stockerMain():
      return render_template("stockerMain.html")
+
+@app.route("/showHazardousItems")
+def hazardousItems():
+    return renderFormResults("SELECT e.itemName, h.HazardType, h.HazardInfo FROM item e JOIN hazard h ON e.itemID = h.itemID;")
 
 @app.route("/employeeList")
 def employeeList():
@@ -137,10 +142,48 @@ def findItemPost():
     
     return renderFormResults("SELECT * FROM ITEM WHERE itemName = '" + itemName + "' OR itemID = " + itemID + ";")
     
+@app.route("/addOrder")
+def addOrder():
 
-@app.route("/orderItems")
+    return render_template("addOrder.html",numItems=1)
 
  
+@app.route("/enlargeAddOrder",methods=["POST"])
+def enlargeAddOrder():
+
+    numItems = int(request.form.get("addItem"))
+    return render_template("addOrder.html",numItems=numItems)
+
+@app.route("/addOrderPost",methods=["POST"])
+def addOrderPost():
+
+    hr = request.form["hrTransacted"]
+    day = request.form["dayTransacted"]
+    month = request.form["monthTransacted"]
+
+
+    runSQLCommand("INSERT INTO orders(hrTransacted,dayTransacted,monthTransacted,managerID) VALUES('" + hr + "','" + day + "','" + month + "'," + str(session['employeeID']) + ");")
+
+
+    numItems = int(request.form.get("numItems"))
+
+
+    try:
+        for i in range(1,numItems+1):
+            itemID = request.form["itemID-" + str(i)]
+            orderAmount = request.form["orderAmount-" + str(i)]
+            result = runSQLCommand("INSERT INTO itemOrder(orderID,itemID,orderAmount) SELECT LAST_INSERT_ID() , " + itemID + " , " + orderAmount + ";")
+    except Exception as err:
+        print("Failure to load")
+        mydb.rollback()
+        return render_template("failure.html")
+
+
+    
+    print("Committing")
+    mydb.commit()
+    return render_template("success.html")
+
 @app.route("/createDatabase")
 def createDatabase():
     return render_template("createDatabase.html")

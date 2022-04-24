@@ -37,7 +37,7 @@ CREATE TABLE HAZARD(
 );
 
 CREATE TABLE RECEIPT(
-	ReceiptID INT NOT NULL,
+	ReceiptID INT NOT NULL AUTO_INCREMENT,
     hrTransacted INT NOT NULL,
     dayTransacted INT NOT NULL,
     monthTransacted INT NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE RECEIPT(
 );
 
 CREATE TABLE ORDERS(
-	OrderID INT NOT NULL,
+	OrderID INT NOT NULL AUTO_INCREMENT,
     hrTransacted INT NOT NULL,
     dayTransacted INT NOT NULL,
     monthTransacted INT NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE ORDERS(
 
 CREATE TABLE receiptBought(
 
-	ReceiptID INT NOT NULL,
+	ReceiptID INT NOT NULL AUTO_INCREMENT,
     itemID INT NOT NULL,
     boughtAmount INT DEFAULT 1,
     
