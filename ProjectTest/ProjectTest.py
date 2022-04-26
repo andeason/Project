@@ -1,3 +1,4 @@
+from django.shortcuts import render
 import mysql.connector
 from flask import Flask, render_template,request,redirect, session,flash,jsonify
 import re
@@ -37,11 +38,11 @@ def runSQLCommand(sql):
 def renderFormResults(sql,modes = None,filepath = None):
     
     error = ""
-    results = runSQLCommand(sql)
+    try:
+        results = runSQLCommand(sql)
+    except Exception as err:
+        render_template("failure.html")
 
-
-    #TODO:  Change executeMYSQL to have two other functions.  
-    #These can better be able to handle errors and not require catching problems twice
     try:
         cursorFields = [i[0] for i in cursor.description]
         if(results != None):
@@ -103,6 +104,8 @@ def logout():
     session.pop('employeeID',default=None)
     return redirect("/")
 
+
+
 @app.route("/findItems")
 def findItems():
     return render_template("findItems.html")
@@ -116,8 +119,8 @@ def findEmployeePost():
     employeeName = request.form["eName"]
     employeeID = request.form["eID"]
     
-    #We need itemID to be something or else the SQL is an error.
-    #itemID is always inputed as positive, so we can give -1.
+    #We need employeeID to be something or else the SQL is an error.
+    #employeeID is always inputed as positive, so we can give -1.
     if(employeeID == "" or isinstance(employeeID,str)):
         employeeID = '-1'
     
@@ -128,6 +131,8 @@ def findEmployeePost():
 def showItems():
 
     return renderFormResults("SELECT * FROM item;")
+
+
 
 @app.route("/findItemPost",methods=["POST"])
 def findItemPost():
@@ -154,6 +159,7 @@ def enlargeAddOrder():
     numItems = int(request.form.get("addItem"))
     return render_template("addOrder.html",numItems=numItems)
 
+
 @app.route("/addOrderPost",methods=["POST"])
 def addOrderPost():
 
@@ -161,9 +167,10 @@ def addOrderPost():
     day = request.form["dayTransacted"]
     month = request.form["monthTransacted"]
 
-
-    runSQLCommand("INSERT INTO orders(hrTransacted,dayTransacted,monthTransacted,managerID) VALUES('" + hr + "','" + day + "','" + month + "'," + str(session['employeeID']) + ");")
-
+    try:
+        runSQLCommand("INSERT INTO orders(hrTransacted,dayTransacted,monthTransacted,managerID) VALUES('" + hr + "','" + day + "','" + month + "'," + str(session['employeeID']) + ");")
+    except Exception as err:
+        return render_template("failure.html")
 
     numItems = int(request.form.get("numItems"))
 
@@ -224,8 +231,12 @@ def loginPost():
     password = request.form["usPass"]
     error = None
 
-    results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID FROM EMPLOYEE e JOIN loginInformation d ON d.EmployeeID = e.EmployeeID WHERE '" + username + "' = username AND '"+ password+"' = pssword;")
-   
+    try:
+        results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID FROM EMPLOYEE e JOIN loginInformation d ON d.EmployeeID = e.EmployeeID WHERE '" + username + "' = username AND '"+ password+"' = pssword;")
+    except Exception as err:
+        error = "Invalid login attempt! Please re-enter login information"
+        return render_template("login.html",error=error)
+
     if(len(results) == 0):
        error = "Invalid login info! Please re-enter login information"
        return render_template("login.html",error=error)
@@ -251,6 +262,7 @@ def showOrders(mode="ORDERID",filepath="showOrders"):
     sql += " JOIN item d on d.itemID = b.itemID JOIN orders e ON e.OrderID = b.OrderID JOIN employee p on e.managerID = p.employeeID GROUP BY ORDERID ORDER BY " + mode + " DESC;"
 
     return renderFormResults(sql,modes = ["ORDERID","TOTALCOST","MANAGERID"],filepath=filepath)
+
 
 @app.route("/totalSales/<string:mode>")
 def totalSales(mode="month",filepath="totalSales"):
