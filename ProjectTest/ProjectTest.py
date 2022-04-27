@@ -4,6 +4,7 @@ import mysql.connector
 from flask import Flask, render_template,request,redirect, session,flash,jsonify
 import re
 
+#Hehe, can we change this?
 
 mydb = None
 
