@@ -5,8 +5,9 @@
 
 
 
-        <div class="text-center">
+        
         {% if session['loginInfo'] == "manager" %}
+        <div class="text-center">
             <h1>Welcome back, manager!</h1>
 
                 <h2>Below you should find some systems to use.</h2>
@@ -37,6 +38,20 @@
                 <a href="/managerItemsOrdered/TOTALITEMORDERS" class = "btn btn-primary btn-lg">Manager Orders</a>
 
                 <a href="/addOrder" class = "btn btn-primary btn-lg">Add Order</a>
+
+                <a href="/addEmployee" class = "btn btn-primary btn-lg">Add Employee</a>
+
+                <a href="/removeEmployee" class = "btn btn-primary btn-lg">Remove Employee</a>
+
+                <br>
+                <br>
+
+                <a href="/addReceipt" class = "btn btn-primary btn-lg">Add Receipt</a>
+
+                <a href="/findOrder" class="btn btn-primary btn-lg">Find Order Info</a>
+
+                <a href="/findReceipt" class= "btn btn-primary btn-lg">Find Receipt Info</a>
+
 
                 <a href="/logout" class="btn btn-lg btn-dark" act>logout</a>
             </div>

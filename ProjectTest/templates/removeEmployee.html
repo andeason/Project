@@ -1,0 +1,32 @@
+{%extends "base.html" %}
+
+{%block content %}
+    <div >
+        {% if session['loginInfo'] == "manager" %}
+            <u><h1>Please enter either either the Employee's name and item ID </h1></u>
+            <form method="post" action="{{ url_for('removeEmployeePost') }}">
+                <div class="form-group-row">
+                    <label for="firstName">Employee First Name</label>
+                    <input type="firstName" class="form-control" name="firstName">
+
+                </div>
+                <div class="form-group-row">
+                    <label for="lastName">Employee Last Name</label>
+                    <input type="lastName" class="form-control" name="lastName">
+
+                </div>
+                <div class="form-group-row">
+                    <label for="eID">Employee ID</label>
+                    <input type="eID" class="form-control" name="eID" >
+
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        {% else %}
+            <h1>Access Denied</h1>
+            <p>Please return to the main page </p>
+            <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
+        {% endif %}
+
+{% endblock %}

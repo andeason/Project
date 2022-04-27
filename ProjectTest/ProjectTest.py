@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from django.shortcuts import render
 import mysql.connector
 from flask import Flask, render_template,request,redirect, session,flash,jsonify
@@ -30,6 +31,7 @@ def runSQLCommand(sql):
         cursor.execute(sql)
         return cursor.fetchall()
     except mysql.connector.Error as err:
+        print(err)
         raise err
 
 
@@ -115,6 +117,13 @@ def findItems():
 def findEmployees():
     return render_template("findEmployees.html")
 
+@app.route("/findMyItems")
+def findMyItems():
+    return renderFormResults("SELECT * FROM ITEM WHERE location IN (SELECT workLocation FROM EMPLOYEE WHERE EmployeeID= " + str(session["employeeID"]) + ");")
+
+@app.route("/findMyInformation")
+def findMyInformation():
+    return renderFormResults("Select * FROM EMPLOYEE WHERE employeeID = " + str(session["employeeID"]) + ";")
 
 @app.route("/findEmployeePost",methods=["POST"])
 def findEmployeePost():
@@ -123,10 +132,12 @@ def findEmployeePost():
     
     #We need employeeID to be something or else the SQL is an error.
     #employeeID is always inputed as positive, so we can give -1.
-    if(employeeID == "" or isinstance(employeeID,str)):
-        employeeID = '-1'
+    try:
+        employeeID = int(employeeID)
+    except ValueError:
+        employeeID = -1
     
-    return renderFormResults("SELECT * FROM EMPLOYEE WHERE firstName = '" + employeeName + "' OR employeeID = " + employeeID + ";")
+    return renderFormResults("SELECT * FROM EMPLOYEE WHERE firstName = '" + employeeName + "' OR employeeID = " + str(employeeID) + ";")
 
 
 @app.route("/showItems")
@@ -144,11 +155,103 @@ def findItemPost():
     
     #We need itemID to be something or else the SQL is an error.
     #itemID is always inputed as positive, so we can give -1.
-    if(itemID == "" or isinstance(itemID,str)):
-        itemID = '-1'
+    try:
+        itemID = int(itemID)
+    except ValueError:
+        itemID = -1
+
+    print(itemID)
     
-    return renderFormResults("SELECT * FROM ITEM WHERE itemName = '" + itemName + "' OR itemID = " + itemID + ";")
+    return renderFormResults("SELECT * FROM ITEM WHERE itemName = '" + itemName + "' OR itemID = " + str(itemID) + ";")
+
+
+@app.route("/addReceipt")
+def addReceipt():
+
+     return render_template("addReceipt.html",numItems=1)
+
+@app.route("/enlargeAddReceipt",methods=["POST"])
+def enlargeAddReceipt():
+
+    numItems = int(request.form.get("addItem"))
+    return render_template("addReceipt.html",numItems=numItems)
+
+@app.route("/addReceiptPost",methods=["POST"])
+def addReceiptPost():
+
+    hr = request.form["hrTransacted"]
+    day = request.form["dayTransacted"]
+    month = request.form["monthTransacted"]
+
+    try:
+        runSQLCommand("INSERT INTO Receipt(hrTransacted,dayTransacted,monthTransacted) VALUES('" + hr + "','" + day + "','" + month +  "');")
+    except Exception as err:
+        return render_template("failure.html")
+
+    numItems = int(request.form.get("numItems"))
+
+
+    try:
+        for i in range(1,numItems+1):
+            itemID = request.form["itemID-" + str(i)]
+            boughtAmount = request.form["boughtAmount-" + str(i)]
+            result = runSQLCommand("INSERT INTO receiptBought(receiptID,itemID,boughtAmount) SELECT LAST_INSERT_ID() , " + itemID + " , " + boughtAmount + ";")
+    except Exception as err:
+        print("Failure to load")
+        mydb.rollback()
+        return render_template("failure.html")
+
+
     
+    print("Committing")
+    mydb.commit()
+    return render_template("success.html")
+
+@app.route("/addEmployee")
+def addEmployee():
+
+    return render_template("addEmployee.html")
+
+@app.route("/addEmployeePost",methods=["POST"])
+def addEmployeePost():
+
+    firstName = request.form["firstName"]
+    lastName = request.form["lastName"]
+    location = request.form["location"]
+
+    try:
+        runSQLCommand("INSERT INTO EMPLOYEE(firstname,lastname,workLocation,position,managerID) VALUES('" + firstName + "','" + lastName + "','" + location + "','stocker'," + str(session['employeeID']) + ");")
+    except Exception as err:
+        mydb.rollback()
+        return render_template("failure.html")
+
+    print("Committing")
+    mydb.commit()
+    return render_template("success.html")
+
+@app.route("/removeEmployee")
+def removeEmployee():
+
+    return render_template("removeEmployee.html")
+
+
+@app.route("/removeEmployeePost",methods=["POST"])
+def removeEmployeePost():
+
+    firstName = request.form["firstName"]
+    lastName = request.form["lastName"]
+    employeeID = request.form["eID"]
+
+    try:
+        runSQLCommand("DELETE FROM EMPLOYEE WHERE firstName = '" + firstName + "' AND lastName = '" + lastName + "' AND employeeID = " + employeeID + " AND ManagerID = " + str(session['employeeID']) + ";")
+    except Exception as err:
+        mydb.rollback()
+        return render_template("failure.html")
+
+    mydb.commit()
+    return render_template("success.html")
+
+
 @app.route("/addOrder")
 def addOrder():
 
@@ -172,6 +275,7 @@ def addOrderPost():
     try:
         runSQLCommand("INSERT INTO orders(hrTransacted,dayTransacted,monthTransacted,managerID) VALUES('" + hr + "','" + day + "','" + month + "'," + str(session['employeeID']) + ");")
     except Exception as err:
+        mydb.rollback()
         return render_template("failure.html")
 
     numItems = int(request.form.get("numItems"))
@@ -192,6 +296,42 @@ def addOrderPost():
     print("Committing")
     mydb.commit()
     return render_template("success.html")
+
+@app.route("/findOrder")
+def findOrder():
+    return render_template("findOrder.html")
+
+@app.route("/findOrderPost",methods=["POST"])
+def findOrderPost():
+    
+    orderID = request.form["oID"]
+    
+    #We need itemID to be something or else the SQL is an error.
+    #itemID is always inputed as positive, so we can give -1.
+    try:
+        orderID = int(orderID)
+    except ValueError:
+        orderID = -1
+
+    return renderFormResults("SELECT r.orderID, r.hrTransacted, r.dayTransacted, r.monthTransacted, b.itemID, b.orderAmount, i.itemName, b.orderAmount * i.sellPrice as TOTALSALE FROM orders r join itemOrder b on r.orderID = b.orderID JOIN item i ON b.itemID = i.itemID WHERE r.orderID = " + str(orderID) + ";")    
+
+@app.route("/findReceipt")
+def findreceipt():
+    return render_template("findReceipt.html")
+
+@app.route("/findReceiptPost", methods=["POST"])
+def findReceiptPost():
+    receiptID = request.form["rID"]
+    
+    #We need itemID to be something or else the SQL is an error.
+    #itemID is always inputed as positive, so we can give -1.
+    try:
+        receiptID = int(receiptID)
+    except ValueError:
+        receiptID = -1
+
+    return renderFormResults("SELECT r.ReceiptID, r.hrTransacted, r.dayTransacted, r.monthTransacted, b.itemID, b.boughtAmount, i.itemName, b.boughtAmount * i.sellPrice as TOTALPURCHASE FROM RECEIPT r join receiptbought b on r.receiptID = b.receiptID JOIN item i ON b.itemID = i.itemID WHERE r.receiptID = " + str(receiptID) + ";")
+
 
 @app.route("/loginPost", methods=["POST"])
 def loginPost():
@@ -227,7 +367,7 @@ def loginPost():
 @app.route("/showOrders/<string:mode>")
 def showOrders(mode="ORDERID",filepath="showOrders"):
 
-    sql = "SELECT b.OrderID as ORDERID, SUM(b.orderAmount * d.price) as TOTALCOST, e.managerID as MANAGERID, p.firstName, p.lastName, e.hrTransacted, e.dayTransacted, e.monthTransacted FROM itemorder b"
+    sql = "SELECT b.OrderID as ORDERID, SUM(b.orderAmount * d.buyPrice) as TOTALCOST, e.managerID as MANAGERID, p.firstName, p.lastName, e.hrTransacted, e.dayTransacted, e.monthTransacted FROM itemorder b"
     sql += " JOIN item d on d.itemID = b.itemID JOIN orders e ON e.OrderID = b.OrderID JOIN employee p on e.managerID = p.employeeID GROUP BY ORDERID ORDER BY " + mode + " DESC;"
 
     return renderFormResults(sql,modes = ["ORDERID","TOTALCOST","MANAGERID"],filepath=filepath)
@@ -237,7 +377,7 @@ def showOrders(mode="ORDERID",filepath="showOrders"):
 def totalSales(mode="month",filepath="totalSales"):
 
     #to ensure it is easy to loop for the html, we will order the results by the month.
-    sql = "SELECT SUM(e.boughtAmount) * p.price  AS MONTHINCOME, d." + mode + "Transacted FROM receiptBought e"
+    sql = "SELECT SUM(e.boughtAmount * p.sellPrice)  AS MONTHINCOME, d." + mode + "Transacted FROM receiptBought e"
     sql += " JOIN RECEIPT d ON e.ReceiptID = d.RECEIPTID JOIN item p ON p.itemID = e.itemID GROUP BY d." + mode + "Transacted ORDER BY " + mode + "Transacted ASC;"
     
     return renderFormResults(sql,modes = ["hr","day","month"],filepath=filepath)
@@ -246,7 +386,7 @@ def totalSales(mode="month",filepath="totalSales"):
 def showReceipts(mode="receiptID",filepath="showReceipts"):
 
 
-    sql = "SELECT b.receiptID as RECEIPTID, SUM(b.boughtAmount * d.price) as TOTALSALES, e.hrTransacted, e.dayTransacted, e.monthTransacted FROM receiptBought b"
+    sql = "SELECT b.receiptID as RECEIPTID, SUM(b.boughtAmount * d.sellPrice) as TOTALSALES, e.hrTransacted, e.dayTransacted, e.monthTransacted FROM receiptBought b"
     sql += " JOIN item d on d.itemID = b.itemID JOIN receipt e ON e.receiptID = b.receiptID GROUP BY RECEIPTID ORDER BY " + mode + " DESC;"
 
     return renderFormResults(sql,modes = ["RECEIPTID","TOTALSALES"],filepath=filepath)
@@ -254,13 +394,13 @@ def showReceipts(mode="receiptID",filepath="showReceipts"):
 @app.route("/netInventory/<string:mode>")
 def netInventory(mode="ITEM", filepath="netInventory"):
 
-    sql = "select p.itemName as ITEM, SUM(b.orderAmount) - SUM(r.boughtAmount) as  NETITEMSGAINED, SUM(r.boughtAmount) * p.price - SUM(b.orderAmount) * p.price as NETGAIN FROM item p LEFT JOIN itemorder b ON b.itemID = p.itemID LEFT JOIN receiptBought r ON p.itemID = r.itemID GROUP BY ITEM ORDER BY " + mode + " DESC;"
+    sql = "SELECT i.itemID as ITEM, a.BOUGHTAMOUNT - b.SOLDAMOUNT as NETITEMSGAINED,  b.SOLDAMOUNT*i.sellPrice - a.BOUGHTAMOUNT*i.buyPrice as NETGAIN from Item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID ORDER BY " + mode + " DESC;"
     
     return renderFormResults(sql,modes = ["ITEM","NETITEMSGAINED","NETGAIN"],filepath=filepath)
 
 @app.route("/managerItemsOrdered/<string:mode>")
 def managerTotalOrders(mode="TOTALITEMORDERS", filepath="managerItemsOrdered"):
-    sql = "SELECT o.managerID, e.firstName as FIRSTNAME, e.lastName, SUM(i.orderAmount) as TOTALITEMORDERS, SUM(i.orderAmount * p.price) as TOTALCOST FROM orders o JOIN employee e ON o.managerID = e.employeeID JOIN itemOrder i ON o.orderID = i.orderID JOIN item p ON p.itemID = i.itemID GROUP BY o.managerID ORDER BY " + mode + " DESC;"
+    sql = "SELECT o.managerID, e.firstName as FIRSTNAME, e.lastName, SUM(i.orderAmount) as TOTALITEMORDERS, SUM(i.orderAmount * p.buyPrice) as TOTALCOST FROM orders o JOIN employee e ON o.managerID = e.employeeID JOIN itemOrder i ON o.orderID = i.orderID JOIN item p ON p.itemID = i.itemID GROUP BY o.managerID ORDER BY " + mode + " DESC;"
 
     return renderFormResults(sql, modes=["TOTALITEMORDERS","TOTALCOST","FIRSTNAME"],filepath=filepath)
 

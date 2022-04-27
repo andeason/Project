@@ -1,0 +1,22 @@
+{%extends "base.html" %}
+
+{%block content %}
+    <div >
+        {% if session['loginInfo'] == "manager" or session['loginInfo'] == "stocker" %}
+            <u><h1>Please enter either either the receiptID</h1></u>
+            <form method="post" action="{{ url_for('findOrderPost') }}">
+                <div class="form-group-row">
+                    <label for="itemID">Order ID</label>
+                    <input type="itemID" class="form-control" name="oID" >
+
+                </div>
+
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+        {% else %}
+            <h1>Access Denied</h1>
+            <p>Please return to the main page </p>
+            <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
+        {% endif %}
+
+{% endblock %}
