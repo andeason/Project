@@ -143,7 +143,7 @@ def findEmployeePost():
 @app.route("/showItems")
 def showItems():
 
-    return renderFormResults("SELECT * FROM item;")
+    return renderFormResults("select i.itemID, i.buyPrice, i.sellPrice, i.itemName, i.itemDescription, i.location, a.BOUGHTAMOUNT - b.SOLDAMOUNT as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID;")
 
 
 
