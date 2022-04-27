@@ -18,9 +18,10 @@ CREATE TABLE EMPLOYEE(
 
 CREATE TABLE ITEM(
 	itemID int(9) NOT NULL,
-    price int(10) DEFAULT 0,
-    quantity int(5) DEFAULT 0,
+    buyPrice int(10) DEFAULT 0,
+    sellPrice int(10) DEFAULT 0,
     itemName varchar(100) NOT NULL,
+    itemDescription varChar(250) DEFAULT NULL,
     Location varChar(100) NOT NULL,
 	PRIMARY KEY(itemID)
     
@@ -89,12 +90,12 @@ INSERT INTO EMPLOYEE(EMPLOYEEID,FirstName,LastName,position) VALUES (5,"Clutch",
 INSERT INTO EMPLOYEE(FirstName,LastName,workLocation,ManagerID,position) VALUES ("Emmanual", "GoldStein","Middle",5,"stocker");
 INSERT INTO EMPLOYEE(FirstName,LastName,workLocation,ManagerID,position) VALUES ("Winston", "Smith","Front",5,"stocker");
 
-INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(17,100,30,"front","3KG PEANUTS");
-INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(21,15,200,"back","MEDSHIRT");
-INSERT INTO ITEM(itemID, price, quantity,location, itemName) VALUES(86,4,1000,"middle","APPLES");
-INSERT INTO ITEM(itemID, price, quantity,location, itemName) VALUES(25,5,0,"BACK","ORANGES");
-INSERT INTO ITEM(itemID, price, quantity,location,itemName) VALUES(40,16,2,"FRONT","RADIOACTIVE WASTE");
-INSERT INTO ITEM(itemID, price, quantity, location, itemName) VALUES(234,400,20,"BACK","TV");
+INSERT INTO ITEM(itemID, buyPrice,sellPrice, location,itemName,itemDescription) VALUES(17,100,150,"front","3KG PEANUTS","Who doesnt like peanuts?");
+INSERT INTO ITEM(itemID, buyPrice,sellPrice, location,itemName) VALUES(21,15,30,"back","MEDSHIRT");
+INSERT INTO ITEM(itemID, buyPrice,sellPrice, location, itemName) VALUES(86,4,6,"middle","APPLES");
+INSERT INTO ITEM(itemID, buyPrice,sellPrice, location, itemName) VALUES(25,5,7,"BACK","ORANGES");
+INSERT INTO ITEM(itemID, buyPrice,sellPrice, location,itemName,itemDescription) VALUES(40,16,43,"FRONT","RADIOACTIVE WASTE","Someone buys this for some reason...");
+INSERT INTO ITEM(itemID, buyPrice,sellPrice, location, itemName,itemDescription) VALUES(234,400,650,"BACK","TV","Expensive, but who doesnt want one?");
 
 INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(17,"allergies","Dont let this be exposed to those with allergies");
 INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(40,"Radiation","Even if you are a Cancer, you probably dont WANT Cancer");
@@ -131,22 +132,3 @@ INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(16,17,687);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(17,25,999);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,21,36);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,86,400);
-
-
-
-CREATE TABLE LoginInformation
-(
-	username VARCHAR(20) NOT NULL,
-    pssword VARCHAR(20) NOT NULL,
-    EmployeeID int NOT NULL,
-    
-    PRIMARY KEY(username,EmployeeID),
-    FOREIGN KEY(EmployeeID) REFERENCES EMPLOYEE(EmployeeID)
-    
-);
-
-INSERT INTO LoginInformation(username,pssword,EmployeeID) VALUES("username","password",1);
-INSERT INTO LoginInformation(username,pssword,EmployeeID) VALUES("bobby","mypass",2);
-INSERT INTO LoginInformation(username,pssword,EmployeeID) VALUES("jonny","mypass",3);
-INSERT INTO LoginInformation(username,pssword,EmployeeID) VALUES("donny","mypass",2);
-

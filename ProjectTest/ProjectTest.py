@@ -34,7 +34,8 @@ def runSQLCommand(sql):
 
 
 
-#hasMode defines if we have multiple views that we wish to change the form to be in
+#modes and filepath are usually set to None if the form is basically a select without any change.
+#If there is more, they can be set to allow different SQL commands.
 def renderFormResults(sql,modes = None,filepath = None):
     
     error = ""
@@ -114,6 +115,7 @@ def findItems():
 def findEmployees():
     return render_template("findEmployees.html")
 
+
 @app.route("/findEmployeePost",methods=["POST"])
 def findEmployeePost():
     employeeName = request.form["eName"]
@@ -190,39 +192,6 @@ def addOrderPost():
     print("Committing")
     mydb.commit()
     return render_template("success.html")
-
-@app.route("/createDatabase")
-def createDatabase():
-    return render_template("createDatabase.html")
-
-@app.route("/initializeDatabase")
-def initializeDatabase():
-    global cursor
-    statement = ""
-
-    for line in open('projectScript.sql'):
-        #This is gonna take some time to implemenet.
-        if not (re.search(r';$',line)):
-            statement = statement + line
-        else:
-            statement = statement + line
-            print("Running " + statement)
-            try:
-                cursor.execute(statement)
-                if(statement[0:4] != "DROP" and statement[0:16] != "CREATE DATABASE"):
-                    cursor.close()
-                    mydb.reconnect()
-                    cursor = mydb.cursor()
-                print("Statement executed")
-            except mysql.connector.Error as e:
-                print(e)
-                print("Error reading")
-            statement = ""
-
-
-    print("The project file should be created now.")
-    return redirect("/")
-
 
 @app.route("/loginPost", methods=["POST"])
 def loginPost():
