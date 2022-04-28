@@ -1,22 +1,22 @@
 {%extends "base.html" %}
 {%block content %}
-     <u><h1 class="text-center">Please enter your login information:</h1></u>
         
-    <h2>{{error}}</h2>
-    <div class="container-sm">
-        <form method="post" action="{{ url_for('loginPost') }}">
-            <div class="form-group-row">
-                <label for="username">First Name</label>
-                <input type="username" class="form-control" name="usName">
+    <u><h2>Insert Login Information</h2></u>
 
-            </div>
-            <div class="form-group-row">
-                <label for="password">Employee ID</label>
-                <input type="password" class="form-control" name="usPass" >
+    <h5>{{error}}</h5>
+    <form method="post" action="{{ url_for('loginPost') }}">
+        <div class="form-group-row-2">
+            <label class="form-label" id="#user" for="user">First Name</label>
+            <input type="username" class="form-control"  placeholder="Insert First Name" name="usName">
 
-            </div>
+        </div>
+        <div class="form-group-row mb-4">
+            <label for="password">Employee ID</label>
+            <input type="password" class="form-control" name="usPass" placeholder="Insert Employee ID">
 
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
 {%endblock%}

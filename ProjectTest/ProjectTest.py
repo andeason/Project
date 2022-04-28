@@ -360,7 +360,7 @@ def loginPost():
     results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID, e.ManagerID FROM EMPLOYEE e WHERE '" + username + "' = e.FirstName AND '" + password +"' = e.EmployeeID;")
        
     if(len(results) == 0):
-       error = "Invalid login info! Please re-enter login information"
+       error = "Invalid login info! Please re-enter info"
        return render_template("login.html",error=error)
 
     
@@ -408,7 +408,7 @@ def showReceipts(mode="receiptID",filepath="showReceipts"):
 @app.route("/netInventory/<string:mode>")
 def netInventory(mode="ITEM", filepath="netInventory"):
 
-    sql = "SELECT i.itemID as ITEM, a.BOUGHTAMOUNT - b.SOLDAMOUNT as NETITEMSGAINED,  b.SOLDAMOUNT*i.sellPrice - a.BOUGHTAMOUNT*i.buyPrice as NETGAIN from Item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID ORDER BY " + mode + " DESC;"
+    sql = "SELECT i.itemID as ITEM, Coalesce(a.BOUGHTAMOUNT,0) - Coalesce(b.SOLDAMOUNT,0) as NETITEMSGAINED,  Coalesce(b.SOLDAMOUNT,0)*i.sellPrice - Coalesce(a.BOUGHTAMOUNT,0)*i.buyPrice as NETGAIN from Item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID ORDER BY " + mode + " DESC;"
     
     return renderFormResults(sql,modes = ["ITEM","NETITEMSGAINED","NETGAIN"],filepath=filepath)
 
