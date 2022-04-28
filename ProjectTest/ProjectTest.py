@@ -61,6 +61,12 @@ def renderFormResults(sql,modes = None,filepath = None):
     
     return render_template("formResults.html",error=error, modes=modes, filepath=filepath)
 
+#To avoid an error of not detecting if a value is NULL (as well as to make cleaner)
+#we need to convert to explicitly null or have it with quotations
+def generateCorrectFormat(input):
+    return None if input=="" else "'" + input + "'"
+
+
 
 
 @app.route("/")
@@ -182,12 +188,12 @@ def enlargeAddReceipt():
 @app.route("/addReceiptPost",methods=["POST"])
 def addReceiptPost():
 
-    hr = request.form["hrTransacted"]
-    day = request.form["dayTransacted"]
-    month = request.form["monthTransacted"]
+    hr = generateCorrectFormat(request.form["hrTransacted"])
+    day = generateCorrectFormat(request.form["dayTransacted"])
+    month = generateCorrectFormat(request.form["monthTransacted"])
 
     try:
-        runSQLCommand("INSERT INTO Receipt(hrTransacted,dayTransacted,monthTransacted) VALUES('" + hr + "','" + day + "','" + month +  "');")
+        runSQLCommand("INSERT INTO Receipt(hrTransacted,dayTransacted,monthTransacted) VALUES(" + hr + "," + day + "," + month +");")
     except Exception as err:
         return render_template("failure.html")
 
@@ -232,12 +238,12 @@ def addEmployee():
 @app.route("/addEmployeePost",methods=["POST"])
 def addEmployeePost():
 
-    firstName = request.form["firstName"]
-    lastName = request.form["lastName"]
-    location = request.form["location"]
+    firstName = generateCorrectFormat(request.form["firstName"])
+    lastName = generateCorrectFormat(request.form["lastName"])
+    location = generateCorrectFormat(request.form["location"])
 
     try:
-        runSQLCommand("INSERT INTO EMPLOYEE(firstname,lastname,workLocation,position,managerID) VALUES('" + firstName + "','" + lastName + "','" + location + "','stocker'," + str(session['employeeID']) + ");")
+        runSQLCommand("INSERT INTO EMPLOYEE(firstname,lastname,workLocation,position,managerID) VALUES(" + firstName + "," + lastName + "," + location + ",'stocker'," + str(session['employeeID']) + ");")
     except Exception as err:
         mydb.rollback()
         return render_template("failure.html")
@@ -245,6 +251,31 @@ def addEmployeePost():
     print("Committing")
     mydb.commit()
     return render_template("success.html")
+
+@app.route("/addItem")
+def addItem():
+    return render_template("addItem.html")
+
+@app.route("/addItemPost",methods=["POST"])
+def addItemPost():
+
+    buyPrice = request.form["buyPrice"]
+    sellPrice = request.form["sellPrice"]
+    itemName = generateCorrectFormat(request.form["itemName"])
+    itemDescription = generateCorrectFormat(request.form["itemDescription"])
+    location= generateCorrectFormat(request.form["location"])
+
+    try:
+        runSQLCommand("INSERT INTO ITEM(buyPrice,sellPrice,itemName,itemDescription,location) VALUES(" + buyPrice + "," + sellPrice + "," + itemName + "," + itemDescription + "," +  location +  ");")
+    except Exception as err:
+        mydb.rollback()
+        return render_template("failure.html")
+
+    print("Committing")
+    mydb.commit()
+    return render_template("success.html")
+
+
 
 @app.route("/removeEmployee")
 def removeEmployee():
@@ -255,12 +286,12 @@ def removeEmployee():
 @app.route("/removeEmployeePost",methods=["POST"])
 def removeEmployeePost():
 
-    firstName = request.form["firstName"]
-    lastName = request.form["lastName"]
+    firstName = generateCorrectFormat(request.form["firstName"])
+    lastName = generateCorrectFormat(request.form["lastName"])
     employeeID = request.form["eID"]
 
     try:
-        runSQLCommand("DELETE FROM EMPLOYEE WHERE firstName = '" + firstName + "' AND lastName = '" + lastName + "' AND employeeID = " + employeeID + " AND ManagerID = " + str(session['employeeID']) + ";")
+        runSQLCommand("DELETE FROM EMPLOYEE WHERE firstName = " + firstName + " AND lastName = " + lastName + " AND employeeID = " + employeeID + " AND ManagerID = " + str(session['employeeID']) + ";")
     except Exception as err:
         mydb.rollback()
         return render_template("failure.html")
@@ -285,12 +316,12 @@ def enlargeAddOrder():
 @app.route("/addOrderPost",methods=["POST"])
 def addOrderPost():
 
-    hr = request.form["hrTransacted"]
-    day = request.form["dayTransacted"]
-    month = request.form["monthTransacted"]
+    hr = generateCorrectFormat(request.form["hrTransacted"])
+    day = generateCorrectFormat(request.form["dayTransacted"])
+    month = generateCorrectFormat(request.form["monthTransacted"])
 
     try:
-        runSQLCommand("INSERT INTO orders(hrTransacted,dayTransacted,monthTransacted,managerID) VALUES('" + hr + "','" + day + "','" + month + "'," + str(session['employeeID']) + ");")
+        runSQLCommand("INSERT INTO orders(hrTransacted,dayTransacted,monthTransacted,managerID) VALUES(" + hr + "," + day + "," + month + "," + str(session['employeeID']) + ");")
     except Exception as err:
         mydb.rollback()
         return render_template("failure.html")
@@ -353,11 +384,11 @@ def findReceiptPost():
 @app.route("/loginPost", methods=["POST"])
 def loginPost():
     
-    username = request.form["usName"]
+    username = generateCorrectFormat(request.form["usName"])
     password = request.form["usPass"]
     error = None
 
-    results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID, e.ManagerID FROM EMPLOYEE e WHERE '" + username + "' = e.FirstName AND '" + password +"' = e.EmployeeID;")
+    results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID, e.ManagerID FROM EMPLOYEE e WHERE " + username + " = e.FirstName AND '" + password +"' = e.EmployeeID;")
        
     if(len(results) == 0):
        error = "Invalid login info! Please re-enter info"

@@ -17,7 +17,7 @@ CREATE TABLE EMPLOYEE(
 
 
 CREATE TABLE ITEM(
-	itemID int(9) NOT NULL,
+	itemID int(9) NOT NULL AUTO_INCREMENT,
     buyPrice int(10) DEFAULT 0,
     sellPrice int(10) DEFAULT 0,
     itemName varchar(100) NOT NULL,
