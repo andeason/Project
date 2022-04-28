@@ -146,7 +146,7 @@ def findEmployeePost():
 @app.route("/showItems")
 def showItems():
 
-    return renderFormResults("select i.itemID, i.buyPrice, i.sellPrice, i.itemName, i.itemDescription, i.location, a.BOUGHTAMOUNT - b.SOLDAMOUNT as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID;")
+    return renderFormResults("select i.itemID, i.buyPrice, i.sellPrice, i.itemName, i.itemDescription, i.location, COALESCE(a.BOUGHTAMOUNT,0) - COALESCE(b.SOLDAMOUNT,0) as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID;")
 
 
 
@@ -198,9 +198,23 @@ def addReceiptPost():
         for i in range(1,numItems+1):
             itemID = request.form["itemID-" + str(i)]
             boughtAmount = request.form["boughtAmount-" + str(i)]
-            result = runSQLCommand("INSERT INTO receiptBought(receiptID,itemID,boughtAmount) SELECT LAST_INSERT_ID() , " + itemID + " , " + boughtAmount + ";")
+
+            #To my knowledge, the easiest way is to do a select to see.  Otherwise, we would need to create a trigger, which seems costly and a bad idea.
+            #Maybe change if we have time?
+            result = runSQLCommand("select COALESCE(a.BOUGHTAMOUNT,0) - COALESCE(b.SOLDAMOUNT,0) as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID WHERE i.itemID = " + str(itemID) +  ";")
+            
+            #This isnt the prettiest.  Should change later?
+            if(int(result[0][0]) - int(boughtAmount) >= 0):
+                runSQLCommand("INSERT INTO receiptBought(receiptID,itemID,boughtAmount) SELECT LAST_INSERT_ID() , " + itemID + " , " + boughtAmount + ";")
+            else:
+                print("Some item would create a negative in stock!  Denying...")
+                mydb.rollback()
+                return render_template("failure.html")
+
+
     except Exception as err:
         print("Failure to load")
+        print(err)
         mydb.rollback()
         return render_template("failure.html")
 
