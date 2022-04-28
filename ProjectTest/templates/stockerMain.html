@@ -3,34 +3,64 @@
 {%block content %}
     <div >
         {% if session['loginInfo'] == "stocker" %}
-        <div class="text-center">
-            <h1>Welcome back, Stocker!</h1>
+        <h1  class="mb-3">Welcome back, Stocker!</h1>
 
-                <h2>Below you should find some systems to use.</h2>
-            <div class="container">
-                <a href="/findItems", class="btn btn-primary btn-lg">Find Items</a>
+        <h2 class="mb-5">Below you should find some systems to use.</h2>
 
-                <a href="/showItems", class="btn btn-primary btn-lg">Show all Items</a>
+        <div class="d-flex flex-row justify-content-center">
+            <div class="dropdown mx-1">
+                <a class="btn btn-lg btn-secondary dropdown-toggle" type="button"  id="itemDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Items
+                </a>
+                <div class="dropdown-menu" aria-labelledby="itemDropDown">
 
-                <a href="/showHazardousItems", class="btn btn-primary btn-lg">Items with Hazards</a>
+                    <a href="/findItems", class="dropdown-item">Find Items</a>
 
-                <a href="/employeeList" class="btn btn-primary btn-lg">Employee List</a>
+                    <a href="/findMyItems" class="dropdown-item">My Items</a>
 
-                <a href="/findMyItems" class="btn btn-primary btn-lg">My Items</a>
+                    <a href="/showItems", class="dropdown-item">Show all Items</a>
 
-                <a href="/findMyInformation" class = "btn btn-primary btn-lg">My employee Information</a>
+                    <a href="/showHazardousItems", class="dropdown-item">Items with Hazards</a>
+                </div>
+            </div> 
 
-                <a href="/findEmployees" class="btn btn-primary btn-lg">Search for Employee</a>
+            <div class="dropdown mx-1">
+                <a class="btn btn-lg btn-secondary dropdown-toggle" type="button"  id="employeeDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Employees
+                </a>
 
-                <a href="/myManager" class="btn btn-primary btn-lg">My Manager</a>
+                <div class="dropdown-menu" aria-labelledby="employeeDropDown">
 
-                <br>
-                <br>
+                    <a href="/employeeList" class="dropdown-item">Employee List</a>
 
-                <a href="/showReceipts/RECEIPTID", class="btn btn-primary btn-lg">Show Receipts</a>
+                    <a href="/findMyInformation" class = "dropdown-item">My employee Information</a>
 
-                <a href="/logout" class="btn btn-lg btn-dark" act>logout</a>
+                    <a href="/myManager" class="dropdown-item">My Manager</a>
+            
+                    <a href="/findEmployees" class="dropdown-item">Search for Employee</a>
+
+                </div>
             </div>
+
+            <div class="dropdown mx-1">
+                <a class="btn btn-lg btn-secondary dropdown-toggle" type="button"  id="receiptsDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Receipts
+                </a>
+
+                <div class="dropdown-menu" aria-labelledby="receiptsDropDown">
+                    
+                    <a href="/showReceipts/RECEIPTID", class="dropdown-item">Show Receipts</a>
+
+                    <a href="/findReceipt" class= "dropdown-item">Find Receipt Info</a>
+
+
+
+                </div>
+            </div>
+
+            <a href="/logout" class="btn btn-lg  mx-1 btn-danger" act>Logout</a>
+
+
         </div>
 
         {% else %}
