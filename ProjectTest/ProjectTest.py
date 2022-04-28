@@ -1,5 +1,3 @@
-from multiprocessing.sharedctypes import Value
-from django.shortcuts import render
 import mysql.connector
 from flask import Flask, render_template,request,redirect, session,flash,jsonify
 import re
@@ -94,6 +92,11 @@ def hazardousItems():
 def employeeList():
 
     return renderFormResults("Select * FROM EMPLOYEE");
+
+@app.route("/myManager")
+def myManager():
+
+    return renderFormResults("SELECT * FROM EMPLOYEE WHERE EmployeeID = " + str(session["managerID"]) + ";")
 
 @app.route("/myEmployees")
 def myEmployees():
@@ -340,12 +343,8 @@ def loginPost():
     password = request.form["usPass"]
     error = None
 
-    try:
-        results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID FROM EMPLOYEE e JOIN loginInformation d ON d.EmployeeID = e.EmployeeID WHERE '" + username + "' = username AND '"+ password+"' = pssword;")
-    except Exception as err:
-        error = "Invalid login attempt! Please re-enter login information"
-        return render_template("login.html",error=error)
-
+    results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID, e.ManagerID FROM EMPLOYEE e WHERE '" + username + "' = e.FirstName AND '" + password +"' = e.EmployeeID;")
+       
     if(len(results) == 0):
        error = "Invalid login info! Please re-enter login information"
        return render_template("login.html",error=error)
@@ -353,6 +352,7 @@ def loginPost():
     
     session['loginInfo'] = results[0][2]
     session['employeeID'] = results[0][3]
+    session['managerID'] = results[0][4]
 
     if(results[0][2] == "manager"):
         return redirect("/managerMain")
