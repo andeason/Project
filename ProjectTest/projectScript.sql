@@ -26,7 +26,8 @@ CREATE TABLE ITEM(
     itemDescription varChar(250) DEFAULT NULL,
     Location varChar(100) NOT NULL,
 	PRIMARY KEY(itemID),
-    CONSTRAINT priceValid CHECK (buyPrice >= 0 AND sellPrice >= 0)
+    CONSTRAINT priceValid CHECK (buyPrice >= 0 AND sellPrice >= 0),
+    CONSTRAINT chkLocation CHECK(location = "front" or location = "back" or location = "middle" )
     
 );
 
