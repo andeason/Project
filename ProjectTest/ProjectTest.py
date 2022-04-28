@@ -117,7 +117,6 @@ def logout():
     return redirect("/")
 
 
-
 @app.route("/findItems")
 def findItems():
     return render_template("findItems.html")
@@ -345,6 +344,103 @@ def addOrderPost():
     mydb.commit()
     return render_template("success.html")
 
+@app.route("/alterEmployee")
+def alterEmployee():
+    return render_template("alterEmployee.html")
+
+
+
+
+def setupAlterSQL(dictionary):
+
+    strings = []
+    for key, value in dictionary.items():
+        if value != None:
+            strings.append(key + " = " + value)
+
+    return ', '.join(strings)
+
+
+
+@app.route("/alterEmployeePost",methods=["POST"])
+def alterEmployeePost():
+
+    #This is the only required one.
+    employeeID = request.form["employeeID"]
+
+
+    #PURE ENERGY
+    alters = {}
+
+
+    alters["firstName"] = generateCorrectFormat(request.form["firstName"])
+    alters["lastName"] = generateCorrectFormat(request.form["lastName"])
+    alters["workLocation"] = generateCorrectFormat(request.form["workLocation"])
+
+    sql = "UPDATE EMPLOYEE SET "
+    sql += setupAlterSQL(alters)
+    sql += " WHERE employeeID = " + employeeID + " AND managerID = " + str(session['employeeID']) + ";"
+
+    try:
+        result = runSQLCommand(sql)
+    except Exception as err:
+        print("Failure to load")
+        mydb.rollback()
+        return render_template("failure.html")
+
+
+    mydb.commit()
+
+    #An update can change nothing.  We should check this case in case we have this and change accordingly
+    if(cursor.rowcount != 0):
+        return render_template("success.html")
+    else:
+        return render_template("failure.html")
+
+@app.route("/alterItem")
+def alterItem():
+
+    return render_template("alterItem.html")
+
+@app.route("/alterItemPost",methods=["POST"])
+def alterItemPost():
+
+
+    itemID = request.form["itemID"]
+    #PURE ENERGY
+    alters = {}
+
+
+    alters["buyPrice"] = None if request.form["buyPrice"] == "" else request.form["buyPrice"]
+    alters["sellPrice"] = None if request.form["sellPrice"] == "" else request.form["sellPrice"]
+    alters["itemName"] = generateCorrectFormat(request.form["itemName"])
+    alters["itemDescription"] = generateCorrectFormat(request.form["itemDescription"])
+    alters["location"] = generateCorrectFormat(request.form["location"])
+
+    sql = "UPDATE ITEM SET "
+    sql += setupAlterSQL(alters)
+    sql += " WHERE itemID = " + itemID + ";"
+    
+    try:
+        result = runSQLCommand(sql)
+    except Exception as err:
+        print("Failure to load")
+        mydb.rollback()
+        return render_template("failure.html")
+
+
+    mydb.commit()
+
+    #An update can change nothing.  We should check this case in case we have this and change accordingly
+    if(cursor.rowcount != 0):
+        return render_template("success.html")
+    else:
+        return render_template("failure.html")
+
+
+
+    
+
 @app.route("/findOrder")
 def findOrder():
     return render_template("findOrder.html")
@@ -405,6 +501,8 @@ def loginPost():
         return redirect("/stockerMain")
     else:
         return render_template("login.html",error=error)
+
+
 
 
 
