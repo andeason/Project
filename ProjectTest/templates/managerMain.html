@@ -7,55 +7,105 @@
 
         
         {% if session['loginInfo'] == "manager" %}
-        <div class="text-center">
-            <h1>Welcome back, manager!</h1>
+            <h1  class="mb-3">Welcome back, manager!</h1>
 
-                <h2>Below you should find some systems to use.</h2>
-            <div class="container">
-                <a href="/findItems", class="btn btn-primary btn-lg">Find Items</a>
+                <h2 class="mb-5">Below you should find some systems to use.</h2>
 
-                <a href="/showItems", class="btn btn-primary btn-lg">Show all Items</a>
+                <div class="d-flex flex-row">
+                    <div class="dropdown mx-1">
+                        <a class="btn btn-lg btn-secondary dropdown-toggle" type="button"  id="itemDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Items
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="itemDropDown">
 
-                <a href="/showHazardousItems", class="btn btn-primary btn-lg">Items with Hazards</a>
+                            <a href="/findItems", class="dropdown-item">Find Items</a>
+        
+                            <a href="/showItems", class="dropdown-item">Show all Items</a>
+        
+                            <a href="/showHazardousItems", class="dropdown-item">Items with Hazards</a>
+                        </div>
+                    </div> 
 
-                <a href="/totalSales/month", class="btn btn-primary btn-lg">Total Sales</a>
+                    <div class="dropdown mx-1">
+                        <a class="btn btn-lg btn-secondary dropdown-toggle" type="button"  id="employeeDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Employees
+                        </a>
 
-                <a href="/employeeList" class="btn btn-primary btn-lg">Employee List</a>
-                
-                <a href="/myEmployees" class="btn btn-primary btn-lg">My Employees</a>
+                        <div class="dropdown-menu" aria-labelledby="employeeDropDown">
 
-                <a href="/findEmployees" class="btn btn-primary btn-lg">Search for Employee</a>
+                            <a href="/employeeList" class="dropdown-item">Employee List</a>
+                    
+                            <a href="/myEmployees" class="dropdown-item">My Employees</a>
+            
+                            <a href="/findEmployees" class="dropdown-item">Search for Employee</a>
 
-                <br>
-                <br>
+                            <div class="dropdown-divider"></div>
 
-                <a href="/showOrders/ORDERID", class="btn btn-primary btn-lg">Show Orders</a>
+                            <a href="/addEmployee" class = "dropdown-item">Add Employee</a>
 
-                <a href="/showReceipts/RECEIPTID", class="btn btn-primary btn-lg">Show Receipts</a>
+                            <a href="/removeEmployee" class = "dropdown-item">Remove Employee</a>
 
-                <a href="/netInventory/ITEM" class="btn btn-primary btn-lg">Net Inventory Info</a>
+                        </div>
+                    </div>
 
-                <a href="/managerItemsOrdered/TOTALITEMORDERS" class = "btn btn-primary btn-lg">Manager Orders</a>
+                    <div class="dropdown mx-1">
+                        <a class="btn btn-lg btn-secondary dropdown-toggle" type="button"  id="ordersDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Orders
+                        </a>
 
-                <a href="/addOrder" class = "btn btn-primary btn-lg">Add Order</a>
+                        <div class="dropdown-menu" aria-labelledby="ordersDropDown">
+                            
+                            <a href="/showOrders/ORDERID", class="dropdown-item">Show Orders</a>
 
-                <a href="/addEmployee" class = "btn btn-primary btn-lg">Add Employee</a>
+                            <a href="/managerItemsOrdered/TOTALITEMORDERS" class = "dropdown-item">Manager Orders</a>
 
-                <a href="/removeEmployee" class = "btn btn-primary btn-lg">Remove Employee</a>
+                            <a href="/findOrder" class="dropdown-item">Find Order Info</a>
 
-                <br>
-                <br>
+                            <div class="dropdown-divider"></div>
 
-                <a href="/addReceipt" class = "btn btn-primary btn-lg">Add Receipt</a>
+                            <a href="/addOrder" class = "dropdown-item">Add Order</a>
+                        
+                        </div>
+                    </div>
 
-                <a href="/findOrder" class="btn btn-primary btn-lg">Find Order Info</a>
+                    <div class="dropdown mx-1">
+                        <a class="btn btn-lg btn-secondary dropdown-toggle" type="button"  id="receiptsDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Receipts
+                        </a>
 
-                <a href="/findReceipt" class= "btn btn-primary btn-lg">Find Receipt Info</a>
+                        <div class="dropdown-menu" aria-labelledby="receiptsDropDown">
+                            
+                            <a href="/showReceipts/RECEIPTID", class="dropdown-item">Show Receipts</a>
+
+                            <a href="/findReceipt" class= "dropdown-item">Find Receipt Info</a>
+
+                            <div class="dropdown-divider"></div>
+
+                            <a href="/addReceipt" class = "dropdown-item">Add Receipt</a>
 
 
-                <a href="/logout" class="btn btn-lg btn-dark" act>logout</a>
-            </div>
-        </div>
+                        </div>
+                    </div>
+
+                    <div class="dropdown mx-1">
+                        <a class="btn btn-lg btn-secondary dropdown-toggle" type="button"  id="otherDropDown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Other
+                        </a>
+
+                        <div class="dropdown-menu" aria-labelledby="otherDropDown">
+                            
+                            <a href="/totalSales/month", class="dropdown-item">Total Sales</a>
+
+                            <a href="/netInventory/ITEM" class="dropdown-item">Net Inventory Info</a>
+            
+                            <a href="/managerItemsOrdered/TOTALITEMORDERS" class = "dropdown-item">Manager Orders</a>
+
+                        </div>
+
+                    </div>
+
+                    <a href="/logout" class="btn btn-lg  mx-1 btn-danger" act>Logout</a>
+                </div>
 
         {% else %}
             <h1>Access Denied</h1>
