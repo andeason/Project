@@ -3,44 +3,48 @@
 {%block content%}
         <div class="info">
             {% if session['loginInfo'] == "manager"  or session['loginInfo'] == "stocker" %}
-                <h1>Here are the following currently in the system:</h1>
+                {% if error == " " %}    
+                    <h1>Here are the following currently in the system:</h1>
 
-                <h2>{{error}}</h2>
+                    <h2>{{error}}</h2>
 
-                <table class = "table table-striped mb-4">
+                    <table class = "table table-striped mb-4">
 
-                {% for message in get_flashed_messages() %}
-                
-                    <tr>
-                        {% for i in message %}
-                            {%if loop.first %}
-                                <th>{{i}}</th>
-                            {%else %}
-                                <td>{{i}}</td>
-                            {% endif %}
-                        {% endfor %}
-                    </tr>
-
-                {% endfor %}
-                </table>
-
-
-
-                {% if modes != none  %}
-                    <div class="dropdown mb-2">
-                        <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            Change Mode
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                            {% for i in modes %}
-                                <a class="dropdown-item" href= {{ "/" ~ filepath ~ "/" ~ i}} + >{{i}}</a>
+                    {% for message in get_flashed_messages() %}
+                    
+                        <tr>
+                            {% for i in message %}
+                                {%if loop.first %}
+                                    <th>{{i}}</th>
+                                {%else %}
+                                    <td>{{i}}</td>
+                                {% endif %}
                             {% endfor %}
+                        </tr>
+
+                    {% endfor %}
+                    </table>
+
+
+
+                    {% if modes != none  %}
+                        <div class="dropdown mb-2">
+                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Change Mode
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                {% for i in modes %}
+                                    <a class="dropdown-item" href= {{ "/" ~ filepath ~ "/" ~ i}} + >{{i}}</a>
+                                {% endfor %}
+                            </div>
                         </div>
-                    </div>
-                {% else %}
-                {% endif %}
+                    {% else %}
+                    {% endif %}
                 
 
+                {%else%}
+                    <h1>Sorry, but we couldn't find that.</h1>
+                {% endif %}
 
                 {%if session['loginInfo'] == "manager" %}
                 <a href="/managerMain" class="btn btn-lg btn-dark" act>Return to Manager Page</a>
@@ -49,12 +53,12 @@
                 {% endif %}
 
             {% else %}
-            <h1>Access Denied</h1>
+                <h1>Access Denied</h1>
 
-            <p>Please return to the main page.</p>
+                <p>Please return to the main page.</p>
 
-            <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
-        {% endif %}
+                <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
+            {% endif %}
         </div>
 
 

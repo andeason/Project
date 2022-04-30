@@ -38,23 +38,24 @@ def runSQLCommand(sql):
 #If there is more, they can be set to allow different SQL commands.
 def renderFormResults(sql,modes = None,filepath = None):
     
-    error = ""
+    error = " "
     try:
         results = runSQLCommand(sql)
+        rowCount = len(results)
     except Exception as err:
         render_template("failure.html")
 
     try:
         cursorFields = [i[0] for i in cursor.description]
-        if(results != None):
-            
+        if(rowCount == 0):
+            error="No output obtained from the search"
+        else:
             flash(cursorFields)
             for info in results:
                 flash(info)
-        else:
-            error="No output obtained from the search"
     except Exception as e:
         print(e)
+
 
 
 
