@@ -4,16 +4,26 @@
         {% if session['loginInfo'] == "manager" %}
             <u><h1>Please enter the information for an Employee.</h1></u>
             <div style="padding-left: 25%; padding-right:25%">
-                <form method="post" action="{{ url_for('addEmployeePost') }}">
+                <form method="post" action="{{ url_for('addItemPost') }}">
                     <div class="form-group-row">
-                        <label for="firstName">FirstName</label>
-                        <input type="firstName" class="form-control" name="firstName">
+                        <label for="buyPrice">Buy Price</label>
+                        <input type="buyPrice" class="form-control" name="buyPrice">
 
                     </div>
                     <div class="form-group-row">
-                        <label for="lastName">Last Name</label>
-                        <input type="lastName" class="form-control" name="lastName" >
+                        <label for="sellPrice">Sell Price</label>
+                        <input type="sellPrice" class="form-control" name="sellPrice" >
 
+                    </div>
+
+                    <div class="form-group-row">
+                        <label for="itemName">item Name</label>
+                        <input type="itemName" class="form-control" name="itemName" >
+                    </div>
+
+                    <div class="form-group-row">
+                        <label for="itemDescription">item Description</label>
+                        <input type="itemDescription" class="form-control" name="itemDescription" >
                     </div>
 
                     <div class="form-group-row">
@@ -26,6 +36,7 @@
                 </form>
             </div>
 
+            
 
 
         {% else %}

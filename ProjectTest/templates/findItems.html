@@ -3,14 +3,15 @@
 {%block content %}
     <div >
         {% if session['loginInfo'] == "manager" or session['loginInfo'] == "stocker" %}
-            <u><h1>Please enter either either the item's name or the item ID </h1></u>
-            <form method="post" action="{{ url_for('findItemPost') }}">
-                <div class="form-group-row">
-                    <label for="itemName">Item Name</label>
-                    <input type="itemName" class="form-control" name="iName">
-
+            <u><h1>Please enter the requested information</h1></u>
+            
+            <div style="padding-left: 25%; padding-right:25%">
+            <form class="form-inline" method="post" action="{{ url_for('findItemPost') }}">
+                <div class="form-group mb-2">     
+                    <label class="form-label"for="itemName">Item Name</label>
+                    <input type="itemName" class="form-control " name="iName">
                 </div>
-                <div class="form-group-row">
+                <div class="form-group-row mb-2">
                     <label for="itemID">Item ID</label>
                     <input type="itemID" class="form-control" name="iID" >
 
@@ -18,6 +19,7 @@
 
                 <button type="submit" class="btn btn-primary">Submit</button>
             </form>
+            </div>
         {% else %}
             <h1>Access Denied</h1>
             <p>Please return to the main page </p>

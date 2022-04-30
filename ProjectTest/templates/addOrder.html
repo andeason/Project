@@ -3,37 +3,39 @@
 {%block content %}
         {% if session['loginInfo'] == "manager" or session['loginInfo'] == "stocker" %}
             <u><h1>Please enter the information for an Order.</h1></u>
-            <form method="post" action="{{ url_for('addOrderPost') }}">
-                <div class="form-group-row">
-                    <label for="hrTransacted">hour Transacted</label>
-                    <input type="itemName" class="form-control" name="hrTransacted">
+            <div style="padding-left: 25%; padding-right:25%">
+                <form method="post" action="{{ url_for('addOrderPost') }}">
+                    <div class="form-group-row">
+                        <label for="hrTransacted">hour Transacted</label>
+                        <input type="itemName" class="form-control" name="hrTransacted">
 
-                </div>
-                <div class="form-group-row">
-                    <label for="dayTransacted">day Transacted</label>
-                    <input type="itemID" class="form-control" name="dayTransacted" >
+                    </div>
+                    <div class="form-group-row">
+                        <label for="dayTransacted">day Transacted</label>
+                        <input type="itemID" class="form-control" name="dayTransacted" >
 
-                </div>
-                <div class="form-group-row">
-                    <label for="monthTransacted">month Transacted</label>
-                    <input type="itemID" class="form-control" name="monthTransacted" >
-                </div>
-                {% for i in range(1,numItems+1) %}
-                <div class="form-group-row">
-                    <label for="itemID">item ID</label>
-                    <input type="itemID" class="form-control" name="{{'itemID-' ~ i}}" >
-                </div>
-                <div class="form-group-row">
-                    <label for="orderAmount">Order Amount</label>
-                    <input type="itemID" class="form-control" name="{{'orderAmount-' ~ i}}" >
-                </div>
-                {% endfor %}
+                    </div>
+                    <div class="form-group-row">
+                        <label for="monthTransacted">month Transacted</label>
+                        <input type="itemID" class="form-control" name="monthTransacted" >
+                    </div>
+                    {% for i in range(1,numItems+1) %}
+                    <div class="form-group-row">
+                        <label for="itemID">item ID</label>
+                        <input type="itemID" class="form-control" name="{{'itemID-' ~ i}}" >
+                    </div>
+                    <div class="form-group-row">
+                        <label for="orderAmount">Order Amount</label>
+                        <input type="itemID" class="form-control" name="{{'orderAmount-' ~ i}}" >
+                    </div>
+                    {% endfor %}
 
-                </div>
+                    </div>
 
 
-                <button type="submit" name="numItems" value={{numItems}} class="btn btn-primary">Submit</button>
-            </form>
+                    <button type="submit" name="numItems" value={{numItems}} class="btn btn-primary">Submit</button>
+                </form>
+            </div>
 
             <br>
             

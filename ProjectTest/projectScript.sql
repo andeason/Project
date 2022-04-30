@@ -12,18 +12,22 @@ CREATE TABLE EMPLOYEE(
     ManagerID INT,
     
     PRIMARY KEY(EmployeeID),
-    FOREIGN KEY(ManagerID) REFERENCES EMPLOYEE(EmployeeID)
+    FOREIGN KEY(ManagerID) REFERENCES EMPLOYEE(EmployeeID),
+    CONSTRAINT chkWorkLocation CHECK (workLocation = "front" or workLocation = "back" or workLocation = "middle" or workLocation is NULL)
+    
 );
 
 
 CREATE TABLE ITEM(
-	itemID int(9) NOT NULL,
+	itemID int NOT NULL AUTO_INCREMENT,
     buyPrice int(10) DEFAULT 0,
     sellPrice int(10) DEFAULT 0,
     itemName varchar(100) NOT NULL,
     itemDescription varChar(250) DEFAULT NULL,
     Location varChar(100) NOT NULL,
-	PRIMARY KEY(itemID)
+	PRIMARY KEY(itemID),
+    CONSTRAINT priceValid CHECK (buyPrice >= 0 AND sellPrice >= 0),
+    CONSTRAINT chkLocation CHECK(location = "front" or location = "back" or location = "middle" )
     
 );
 
@@ -43,8 +47,13 @@ CREATE TABLE RECEIPT(
     dayTransacted INT NOT NULL,
     monthTransacted INT NOT NULL,
     
-    PRIMARY KEY(ReceiptID)
+    PRIMARY KEY(ReceiptID),
+    CONSTRAINT checkHr CHECK(0 <= hrTransacted and hrTransacted <= 23),
+    CONSTRAINT checkDay CHECK(0 <= dayTransacted and dayTransacted <= 30),
+    CONSTRAINT checkMonth CHECK(0 <= monthTransacted and monthTransacted <= 11)
+    
 );
+
 
 CREATE TABLE ORDERS(
 	OrderID INT NOT NULL AUTO_INCREMENT,
@@ -56,6 +65,7 @@ CREATE TABLE ORDERS(
     PRIMARY KEY(OrderID),
     FOREIGN KEY(managerID) REFERENCES EMPLOYEE(EmployeeID)
     ON UPDATE CASCADE ON DELETE CASCADE
+    
 
 );
 
@@ -68,7 +78,8 @@ CREATE TABLE receiptBought(
     
     FOREIGN KEY(ReceiptID) REFERENCES Receipt(ReceiptID)
     ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY(itemID) REFERENCES Item(itemID) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY(itemID) REFERENCES Item(itemID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT chkBought CHECK(boughtAmount > 0)
 );
 
 
@@ -79,7 +90,8 @@ CREATE TABLE itemOrder(
     
     FOREIGN KEY(OrderID) REFERENCES Orders(OrderID)
     ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY(itemID) REFERENCES Item(itemID) ON DELETE CASCADE ON UPDATE CASCADE
+    FOREIGN KEY(itemID) REFERENCES Item(itemID) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT chkOrder CHECK(orderAmount > 0)
 );
 
 INSERT INTO EMPLOYEE(EmployeeID,FirstName,LastName,position) VALUES (1,"Johnny","Sins","manager");
@@ -102,7 +114,7 @@ INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(40,"Radiation","Even if 
 INSERT INTO HAZARD(itemID,HazardType,HazardInfo) VALUES(40,"Toxic","Dont let near others.");
 
 
-INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES (912, 3,8,12);
+INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES (912, 3,8,11);
 INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES(913,2,8,8);
 INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES(914,2,9,8);
 INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VALUES(1012,7,12,9);

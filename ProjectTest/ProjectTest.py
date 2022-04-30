@@ -61,6 +61,12 @@ def renderFormResults(sql,modes = None,filepath = None):
     
     return render_template("formResults.html",error=error, modes=modes, filepath=filepath)
 
+#To avoid an error of not detecting if a value is NULL (as well as to make cleaner)
+#we need to convert to explicitly null or have it with quotations
+def generateCorrectFormat(input):
+    return None if input=="" else "'" + input + "'"
+
+
 
 
 @app.route("/")
@@ -111,7 +117,6 @@ def logout():
     return redirect("/")
 
 
-
 @app.route("/findItems")
 def findItems():
     return render_template("findItems.html")
@@ -146,7 +151,7 @@ def findEmployeePost():
 @app.route("/showItems")
 def showItems():
 
-    return renderFormResults("select i.itemID, i.buyPrice, i.sellPrice, i.itemName, i.itemDescription, i.location, a.BOUGHTAMOUNT - b.SOLDAMOUNT as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID;")
+    return renderFormResults("select i.itemID, i.buyPrice, i.sellPrice, i.itemName, i.itemDescription, i.location, COALESCE(a.BOUGHTAMOUNT,0) - COALESCE(b.SOLDAMOUNT,0) as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID;")
 
 
 
@@ -182,12 +187,12 @@ def enlargeAddReceipt():
 @app.route("/addReceiptPost",methods=["POST"])
 def addReceiptPost():
 
-    hr = request.form["hrTransacted"]
-    day = request.form["dayTransacted"]
-    month = request.form["monthTransacted"]
+    hr = generateCorrectFormat(request.form["hrTransacted"])
+    day = generateCorrectFormat(request.form["dayTransacted"])
+    month = generateCorrectFormat(request.form["monthTransacted"])
 
     try:
-        runSQLCommand("INSERT INTO Receipt(hrTransacted,dayTransacted,monthTransacted) VALUES('" + hr + "','" + day + "','" + month +  "');")
+        runSQLCommand("INSERT INTO Receipt(hrTransacted,dayTransacted,monthTransacted) VALUES(" + hr + "," + day + "," + month +");")
     except Exception as err:
         return render_template("failure.html")
 
@@ -198,9 +203,23 @@ def addReceiptPost():
         for i in range(1,numItems+1):
             itemID = request.form["itemID-" + str(i)]
             boughtAmount = request.form["boughtAmount-" + str(i)]
-            result = runSQLCommand("INSERT INTO receiptBought(receiptID,itemID,boughtAmount) SELECT LAST_INSERT_ID() , " + itemID + " , " + boughtAmount + ";")
+
+            #To my knowledge, the easiest way is to do a select to see.  Otherwise, we would need to create a trigger, which seems costly and a bad idea.
+            #Maybe change if we have time?
+            result = runSQLCommand("select COALESCE(a.BOUGHTAMOUNT,0) - COALESCE(b.SOLDAMOUNT,0) as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID WHERE i.itemID = " + str(itemID) +  ";")
+            
+            #This isnt the prettiest.  Should change later?
+            if(int(result[0][0]) - int(boughtAmount) >= 0):
+                runSQLCommand("INSERT INTO receiptBought(receiptID,itemID,boughtAmount) SELECT LAST_INSERT_ID() , " + itemID + " , " + boughtAmount + ";")
+            else:
+                print("Some item would create a negative in stock!  Denying...")
+                mydb.rollback()
+                return render_template("failure.html")
+
+
     except Exception as err:
         print("Failure to load")
+        print(err)
         mydb.rollback()
         return render_template("failure.html")
 
@@ -218,12 +237,12 @@ def addEmployee():
 @app.route("/addEmployeePost",methods=["POST"])
 def addEmployeePost():
 
-    firstName = request.form["firstName"]
-    lastName = request.form["lastName"]
-    location = request.form["location"]
+    firstName = generateCorrectFormat(request.form["firstName"])
+    lastName = generateCorrectFormat(request.form["lastName"])
+    location = generateCorrectFormat(request.form["location"])
 
     try:
-        runSQLCommand("INSERT INTO EMPLOYEE(firstname,lastname,workLocation,position,managerID) VALUES('" + firstName + "','" + lastName + "','" + location + "','stocker'," + str(session['employeeID']) + ");")
+        runSQLCommand("INSERT INTO EMPLOYEE(firstname,lastname,workLocation,position,managerID) VALUES(" + firstName + "," + lastName + "," + location + ",'stocker'," + str(session['employeeID']) + ");")
     except Exception as err:
         mydb.rollback()
         return render_template("failure.html")
@@ -231,6 +250,31 @@ def addEmployeePost():
     print("Committing")
     mydb.commit()
     return render_template("success.html")
+
+@app.route("/addItem")
+def addItem():
+    return render_template("addItem.html")
+
+@app.route("/addItemPost",methods=["POST"])
+def addItemPost():
+
+    buyPrice = request.form["buyPrice"]
+    sellPrice = request.form["sellPrice"]
+    itemName = generateCorrectFormat(request.form["itemName"])
+    itemDescription = generateCorrectFormat(request.form["itemDescription"])
+    location= generateCorrectFormat(request.form["location"])
+
+    try:
+        runSQLCommand("INSERT INTO ITEM(buyPrice,sellPrice,itemName,itemDescription,location) VALUES(" + buyPrice + "," + sellPrice + "," + itemName + "," + itemDescription + "," +  location +  ");")
+    except Exception as err:
+        mydb.rollback()
+        return render_template("failure.html")
+
+    print("Committing")
+    mydb.commit()
+    return render_template("success.html")
+
+
 
 @app.route("/removeEmployee")
 def removeEmployee():
@@ -241,12 +285,12 @@ def removeEmployee():
 @app.route("/removeEmployeePost",methods=["POST"])
 def removeEmployeePost():
 
-    firstName = request.form["firstName"]
-    lastName = request.form["lastName"]
+    firstName = generateCorrectFormat(request.form["firstName"])
+    lastName = generateCorrectFormat(request.form["lastName"])
     employeeID = request.form["eID"]
 
     try:
-        runSQLCommand("DELETE FROM EMPLOYEE WHERE firstName = '" + firstName + "' AND lastName = '" + lastName + "' AND employeeID = " + employeeID + " AND ManagerID = " + str(session['employeeID']) + ";")
+        runSQLCommand("DELETE FROM EMPLOYEE WHERE firstName = " + firstName + " AND lastName = " + lastName + " AND employeeID = " + employeeID + " AND ManagerID = " + str(session['employeeID']) + ";")
     except Exception as err:
         mydb.rollback()
         return render_template("failure.html")
@@ -271,12 +315,12 @@ def enlargeAddOrder():
 @app.route("/addOrderPost",methods=["POST"])
 def addOrderPost():
 
-    hr = request.form["hrTransacted"]
-    day = request.form["dayTransacted"]
-    month = request.form["monthTransacted"]
+    hr = generateCorrectFormat(request.form["hrTransacted"])
+    day = generateCorrectFormat(request.form["dayTransacted"])
+    month = generateCorrectFormat(request.form["monthTransacted"])
 
     try:
-        runSQLCommand("INSERT INTO orders(hrTransacted,dayTransacted,monthTransacted,managerID) VALUES('" + hr + "','" + day + "','" + month + "'," + str(session['employeeID']) + ");")
+        runSQLCommand("INSERT INTO orders(hrTransacted,dayTransacted,monthTransacted,managerID) VALUES(" + hr + "," + day + "," + month + "," + str(session['employeeID']) + ");")
     except Exception as err:
         mydb.rollback()
         return render_template("failure.html")
@@ -299,6 +343,103 @@ def addOrderPost():
     print("Committing")
     mydb.commit()
     return render_template("success.html")
+
+@app.route("/alterEmployee")
+def alterEmployee():
+    return render_template("alterEmployee.html")
+
+
+
+
+def setupAlterSQL(dictionary):
+
+    strings = []
+    for key, value in dictionary.items():
+        if value != None:
+            strings.append(key + " = " + value)
+
+    return ', '.join(strings)
+
+
+
+@app.route("/alterEmployeePost",methods=["POST"])
+def alterEmployeePost():
+
+    #This is the only required one.
+    employeeID = request.form["employeeID"]
+
+
+    #PURE ENERGY
+    alters = {}
+
+
+    alters["firstName"] = generateCorrectFormat(request.form["firstName"])
+    alters["lastName"] = generateCorrectFormat(request.form["lastName"])
+    alters["workLocation"] = generateCorrectFormat(request.form["workLocation"])
+
+    sql = "UPDATE EMPLOYEE SET "
+    sql += setupAlterSQL(alters)
+    sql += " WHERE employeeID = " + employeeID + " AND managerID = " + str(session['employeeID']) + ";"
+
+    try:
+        result = runSQLCommand(sql)
+    except Exception as err:
+        print("Failure to load")
+        mydb.rollback()
+        return render_template("failure.html")
+
+
+    mydb.commit()
+
+    #An update can change nothing.  We should check this case in case we have this and change accordingly
+    if(cursor.rowcount != 0):
+        return render_template("success.html")
+    else:
+        return render_template("failure.html")
+
+@app.route("/alterItem")
+def alterItem():
+
+    return render_template("alterItem.html")
+
+@app.route("/alterItemPost",methods=["POST"])
+def alterItemPost():
+
+
+    itemID = request.form["itemID"]
+    #PURE ENERGY
+    alters = {}
+
+
+    alters["buyPrice"] = None if request.form["buyPrice"] == "" else request.form["buyPrice"]
+    alters["sellPrice"] = None if request.form["sellPrice"] == "" else request.form["sellPrice"]
+    alters["itemName"] = generateCorrectFormat(request.form["itemName"])
+    alters["itemDescription"] = generateCorrectFormat(request.form["itemDescription"])
+    alters["location"] = generateCorrectFormat(request.form["location"])
+
+    sql = "UPDATE ITEM SET "
+    sql += setupAlterSQL(alters)
+    sql += " WHERE itemID = " + itemID + ";"
+    
+    try:
+        result = runSQLCommand(sql)
+    except Exception as err:
+        print("Failure to load")
+        mydb.rollback()
+        return render_template("failure.html")
+
+
+    mydb.commit()
+
+    #An update can change nothing.  We should check this case in case we have this and change accordingly
+    if(cursor.rowcount != 0):
+        return render_template("success.html")
+    else:
+        return render_template("failure.html")
+
+
+
+    
 
 @app.route("/findOrder")
 def findOrder():
@@ -339,14 +480,14 @@ def findReceiptPost():
 @app.route("/loginPost", methods=["POST"])
 def loginPost():
     
-    username = request.form["usName"]
+    username = generateCorrectFormat(request.form["usName"])
     password = request.form["usPass"]
     error = None
 
-    results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID, e.ManagerID FROM EMPLOYEE e WHERE '" + username + "' = e.FirstName AND '" + password +"' = e.EmployeeID;")
+    results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID, e.ManagerID FROM EMPLOYEE e WHERE " + username + " = e.FirstName AND '" + password +"' = e.EmployeeID;")
        
     if(len(results) == 0):
-       error = "Invalid login info! Please re-enter login information"
+       error = "Invalid login info! Please re-enter info"
        return render_template("login.html",error=error)
 
     
@@ -360,6 +501,8 @@ def loginPost():
         return redirect("/stockerMain")
     else:
         return render_template("login.html",error=error)
+
+
 
 
 
@@ -394,7 +537,7 @@ def showReceipts(mode="receiptID",filepath="showReceipts"):
 @app.route("/netInventory/<string:mode>")
 def netInventory(mode="ITEM", filepath="netInventory"):
 
-    sql = "SELECT i.itemID as ITEM, a.BOUGHTAMOUNT - b.SOLDAMOUNT as NETITEMSGAINED,  b.SOLDAMOUNT*i.sellPrice - a.BOUGHTAMOUNT*i.buyPrice as NETGAIN from Item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID ORDER BY " + mode + " DESC;"
+    sql = "SELECT i.itemID as ITEM, Coalesce(a.BOUGHTAMOUNT,0) - Coalesce(b.SOLDAMOUNT,0) as NETITEMSGAINED,  Coalesce(b.SOLDAMOUNT,0)*i.sellPrice - Coalesce(a.BOUGHTAMOUNT,0)*i.buyPrice as NETGAIN from Item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID ORDER BY " + mode + " DESC;"
     
     return renderFormResults(sql,modes = ["ITEM","NETITEMSGAINED","NETGAIN"],filepath=filepath)
 
