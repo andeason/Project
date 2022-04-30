@@ -2,17 +2,17 @@
 
 {%block content%}
         <div class="info">
-            {% if session['loginInfo'] == "manager"  or session['loginInfo'] == "stocker" %}
-                {% if error == " " %}    
+            {% if session['loginInfo'] == "manager"  or session['loginInfo'] == "stocker"%}
+                {% if error == " " %}
                     <h1>Here are the following currently in the system:</h1>
 
                     <h2>{{error}}</h2>
 
-                    <table class = "table table-striped mb-4">
+                    <table class = "table table-striped">
 
                     {% for message in get_flashed_messages() %}
-                    
-                        <tr>
+                
+                       <tr>
                             {% for i in message %}
                                 {%if loop.first %}
                                     <th>{{i}}</th>
@@ -28,7 +28,7 @@
 
 
                     {% if modes != none  %}
-                        <div class="dropdown mb-2">
+                        <div class="dropdown">
                             <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 Change Mode
                             </button>
@@ -42,22 +42,21 @@
                     {% endif %}
                 
 
-                {%else%}
-                    <h1>Sorry, but we couldn't find that.</h1>
-                {% endif %}
 
-                {%if session['loginInfo'] == "manager" %}
-                <a href="/managerMain" class="btn btn-lg btn-dark" act>Return to Manager Page</a>
+                    {%if session['loginInfo'] == "manager" %}
+                    <a href="/managerMain" class="btn btn-lg btn-dark" act>Return to Manager Page</a>
+                    {% else %}
+                    <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Stocker Page</a>
+                    {% endif %}
+
                 {% else %}
-                <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Manager Page</a>
+                    <h1>Sorry, but we couldn't find that.</h1>
+                    {%if session['loginInfo'] == "manager" %}
+                        <a href="/managerMain" class="btn btn-lg btn-dark" act>Return to Manager Page</a>
+                    {% else %}
+                        <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Stocker Page</a>
+                    {% endif %}
                 {% endif %}
-
-            {% else %}
-                <h1>Access Denied</h1>
-
-                <p>Please return to the main page.</p>
-
-                <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
             {% endif %}
         </div>
 
