@@ -62,9 +62,12 @@
             {% else %}
                 <h1>Access Denied</h1>
 
-                <p>Please return to the main page.</p>
-
-                <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
+                <p>Please return to your page.</p>
+                {% if session['loginInfo'] == "stocker" %}
+                    <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Stocker Page</a>
+                {% else %}
+                    <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
+                {% endif %}
             {% endif %}
         </div>
 

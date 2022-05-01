@@ -40,22 +40,19 @@ CREATE TABLE HAZARD(
 
 CREATE TABLE RECEIPT(
 	ReceiptID INT NOT NULL AUTO_INCREMENT,
-    hrTransacted INT NOT NULL,
-    dayTransacted INT NOT NULL,
-    monthTransacted INT NOT NULL,
+    hrTransacted INT NOT NULL CHECK(0 <= hrTransacted and hrTransacted <= 23),
+    dayTransacted INT NOT NULL CHECK(0 <= dayTransacted and dayTransacted <= 30),
+    monthTransacted INT NOT NULL CHECK(0 <= monthTransacted and monthTransacted <= 11),
     
-    PRIMARY KEY(ReceiptID),
-    CONSTRAINT checkHr CHECK(0 <= hrTransacted and hrTransacted <= 23),
-    CONSTRAINT checkDay CHECK(0 <= dayTransacted and dayTransacted <= 30),
-    CONSTRAINT checkMonth CHECK(0 <= monthTransacted and monthTransacted <= 11)
+    PRIMARY KEY(ReceiptID)
     
 );
 
 CREATE TABLE ORDERS(
 	OrderID INT NOT NULL AUTO_INCREMENT,
-    hrTransacted INT NOT NULL,
-    dayTransacted INT NOT NULL,
-    monthTransacted INT NOT NULL,
+    hrTransacted INT NOT NULL CHECK(0 <= hrTransacted and hrTransacted <= 23),
+    dayTransacted INT NOT NULL CHECK(0 <= dayTransacted and dayTransacted <= 30),
+    monthTransacted INT NOT NULL CHECK(0 <= monthTransacted and monthTransacted <= 11),
     managerID INT NOT NULL,
     
     PRIMARY KEY(OrderID),
@@ -124,7 +121,7 @@ INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (913,25,423);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (914,17,1);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (914,21,75);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (914,25,3);
-INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (1012,40,10000);
+INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (1012,40,100);
 
 INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(15,7,12,3,1);
 INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(16,9,11,2,5);
@@ -132,12 +129,12 @@ INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, manage
 INSERT INTO ORDERS(OrderID, hrTransacted, dayTransacted, monthTransacted, managerID) VALUES(18,8,3,4,5);
 
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(15,17,200);
-INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(15,86,400);
+INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(15,86,1200);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(16,40,500);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(16,21,30);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(16,17,687);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(17,25,999);
-INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,21,36);
+INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,21,700);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,86,400);
 
 

@@ -1,7 +1,7 @@
 {%extends "base.html" %}
 
 {%block content %}
-        {% if session['loginInfo'] == "manager" or session['loginInfo'] == "stocker" %}
+        {% if session['loginInfo'] == "manager" %}
             <u><h1>Please enter the information for an Order.</h1></u>
             <div style="padding-left: 25%; padding-right:25%">
                 <form method="post" action="{{ url_for('addOrderPost') }}">
@@ -45,9 +45,14 @@
 
 
         {% else %}
-            <h1>Access Denied</h1>
-            <p>Please return to the main page </p>
+        <h1>Access Denied</h1>
+
+        <p>Please return to your page.</p>
+        {% if session['loginInfo'] == "stocker" %}
+            <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Stocker Page</a>
+        {% else %}
             <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
+        {% endif %}
         {% endif %}
 
 {% endblock %}

@@ -65,7 +65,7 @@ def renderFormResults(sql,modes = None,filepath = None):
 #To avoid an error of not detecting if a value is NULL (as well as to make cleaner)
 #we need to convert to explicitly null or have it with quotations
 def generateCorrectFormat(input):
-    return "Null" if input=="" else "'" + input + "'"
+    return "Null" if input=="" else "'" + input.strip() + "'"
 
 
 
@@ -136,7 +136,7 @@ def findMyInformation():
 
 @app.route("/findEmployeePost",methods=["POST"])
 def findEmployeePost():
-    employeeName = request.form["eName"]
+    employeeName = generateCorrectFormat(request.form["eName"])
     employeeID = request.form["eID"]
     
     #We need employeeID to be something or else the SQL is an error.
@@ -146,7 +146,7 @@ def findEmployeePost():
     except ValueError:
         employeeID = -1
     
-    return renderFormResults("SELECT * FROM EMPLOYEE WHERE firstName = '" + employeeName + "' OR employeeID = " + str(employeeID) + ";")
+    return renderFormResults("SELECT * FROM EMPLOYEE WHERE firstName = " + employeeName + " OR employeeID = " + str(employeeID) + ";")
 
 
 @app.route("/showItems")
@@ -159,7 +159,7 @@ def showItems():
 @app.route("/findItemPost",methods=["POST"])
 def findItemPost():
 
-    itemName = request.form["iName"]
+    itemName = generateCorrectFormat(request.form["iName"])
     itemID = request.form["iID"]
     
     #We need itemID to be something or else the SQL is an error.
@@ -171,7 +171,7 @@ def findItemPost():
 
     print(itemID)
     
-    return renderFormResults("SELECT * FROM ITEM WHERE itemName = '" + itemName + "' OR itemID = " + str(itemID) + ";")
+    return renderFormResults("SELECT * FROM ITEM WHERE itemName = " + itemName + " OR itemID = " + str(itemID) + ";")
 
 
 @app.route("/addReceipt")
@@ -459,7 +459,7 @@ def findOrderPost():
     except ValueError:
         orderID = -1
 
-    return renderFormResults("SELECT r.orderID, r.hrTransacted, r.dayTransacted, r.monthTransacted, b.itemID, b.orderAmount, i.itemName, b.orderAmount * i.sellPrice as TOTALSALE FROM orders r join itemOrder b on r.orderID = b.orderID JOIN item i ON b.itemID = i.itemID WHERE r.orderID = " + str(orderID) + ";")    
+    return renderFormResults("SELECT r.orderID, r.hrTransacted, r.dayTransacted, r.monthTransacted, b.itemID, b.orderAmount, i.itemName, b.orderAmount * i.sellPrice as TOTALCOST FROM orders r join itemOrder b on r.orderID = b.orderID JOIN item i ON b.itemID = i.itemID WHERE r.orderID = " + str(orderID) + ";")    
 
 @app.route("/findReceipt")
 def findreceipt():
@@ -529,7 +529,7 @@ def showOrders(mode="ORDERID",filepath="showOrders"):
 def totalSales(mode="month",filepath="totalSales"):
 
     #to ensure it is easy to loop for the html, we will order the results by the month.
-    sql = "SELECT SUM(e.boughtAmount * p.sellPrice)  AS " + mode + "income, d." + mode + "Transacted FROM receiptBought e"
+    sql = "SELECT SUM(e.boughtAmount * p.sellPrice)  AS " + mode + "sales, d." + mode + "Transacted FROM receiptBought e"
     sql += " JOIN RECEIPT d ON e.ReceiptID = d.RECEIPTID JOIN item p ON p.itemID = e.itemID GROUP BY d." + mode + "Transacted ORDER BY " + mode + "Transacted ASC;"
     
     return renderFormResults(sql,modes = ["hr","day","month"],filepath=filepath)

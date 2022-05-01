@@ -7,9 +7,9 @@
     <p>Return to your section:</p>
 
     {% if session['loginInfo'] == "manager" %}
-        <a href="/managerMain" class="btn btn-lg btn-dark" act>Return to Main</a>
+        <a href="/managerMain" class="btn btn-lg btn-dark" act>Return to Manager page</a>
     {% else %}
-        <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Main</a>
+        <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to stocker page</a>
     {% endif %}
 
 {% endblock %}
