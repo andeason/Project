@@ -8,26 +8,23 @@ CREATE TABLE EMPLOYEE(
     FirstName varchar(50) NOT NULL,
     LastName varchar(50) NOT NULL,
     position varchar(50) NOT NULL,
-    workLocation varChar(20) DEFAULT NULL,
+    workLocation varChar(20) DEFAULT NULL CHECK(workLocation = "front" or workLocation = "back" or workLocation = "middle" or workLocation is NULL),
     ManagerID INT,
     
     PRIMARY KEY(EmployeeID),
-    FOREIGN KEY(ManagerID) REFERENCES EMPLOYEE(EmployeeID),
-    CONSTRAINT chkWorkLocation CHECK (workLocation = "front" or workLocation = "back" or workLocation = "middle" or workLocation is NULL)
+    FOREIGN KEY(ManagerID) REFERENCES EMPLOYEE(EmployeeID)
     
 );
 
 
 CREATE TABLE ITEM(
 	itemID int NOT NULL AUTO_INCREMENT,
-    buyPrice int(10) DEFAULT 0,
-    sellPrice int(10) DEFAULT 0,
+    buyPrice int DEFAULT 0 CHECK (buyPrice >= 0),
+    sellPrice int DEFAULT 1 CHECK(sellPrice > 0),
     itemName varchar(100) NOT NULL,
     itemDescription varChar(250) DEFAULT NULL,
-    Location varChar(100) NOT NULL,
-	PRIMARY KEY(itemID),
-    CONSTRAINT priceValid CHECK (buyPrice >= 0 AND sellPrice >= 0),
-    CONSTRAINT chkLocation CHECK(location = "front" or location = "back" or location = "middle" )
+    Location varChar(100) NOT NULL CHECK(location = "front" or location = "back" or location = "middle" ),
+	PRIMARY KEY(itemID)
     
 );
 
@@ -54,7 +51,6 @@ CREATE TABLE RECEIPT(
     
 );
 
-
 CREATE TABLE ORDERS(
 	OrderID INT NOT NULL AUTO_INCREMENT,
     hrTransacted INT NOT NULL,
@@ -72,26 +68,26 @@ CREATE TABLE ORDERS(
 
 CREATE TABLE receiptBought(
 
-	ReceiptID INT NOT NULL AUTO_INCREMENT,
+	ReceiptID INT NOT NULL,
     itemID INT NOT NULL,
-    boughtAmount INT DEFAULT 1,
+    boughtAmount INT DEFAULT 1 CHECK(boughtAmount > 0),
     
+    PRIMARY KEY(itemID, receiptID),
     FOREIGN KEY(ReceiptID) REFERENCES Receipt(ReceiptID)
     ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY(itemID) REFERENCES Item(itemID) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT chkBought CHECK(boughtAmount > 0)
+    FOREIGN KEY(itemID) REFERENCES Item(itemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 
 CREATE TABLE itemOrder(
 	OrderID INT NOT NULL,
     itemID int NOT NULL,
-    orderAmount int DEFAULT 1,
+    orderAmount int DEFAULT 1 CHECK(orderAmount > 0),
     
+    PRIMARY KEY(itemID, orderID),
     FOREIGN KEY(OrderID) REFERENCES Orders(OrderID)
     ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY(itemID) REFERENCES Item(itemID) ON DELETE CASCADE ON UPDATE CASCADE,
-    CONSTRAINT chkOrder CHECK(orderAmount > 0)
+    FOREIGN KEY(itemID) REFERENCES Item(itemID) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 INSERT INTO EMPLOYEE(EmployeeID,FirstName,LastName,position) VALUES (1,"Johnny","Sins","manager");
@@ -121,7 +117,6 @@ INSERT INTO RECEIPT(ReceiptID, hrTransacted, dayTransacted, monthTransacted) VAL
 
 
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (912,17,40);
-INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (912,17,2);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (912,86,1000);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (913,17,8);
 INSERT INTO receiptBought(ReceiptID, itemID, boughtAmount) VALUES (913,21,10);
@@ -144,3 +139,5 @@ INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(16,17,687);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(17,25,999);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,21,36);
 INSERT INTO itemOrder(orderID, itemID, orderAmount) VALUES(18,86,400);
+
+

@@ -1,26 +1,33 @@
 {%extends "base.html" %}
 
 {%block content%}
-        <div class="info">
+        <div>
             {% if session['loginInfo'] == "manager"  or session['loginInfo'] == "stocker" %}
                 {% if error == " " %}    
-                    <h1>Here are the following currently in the system:</h1>
+                    <h1>Here are the following results in the system:</h1>
 
                     <h2>{{error}}</h2>
 
                     <table class = "table table-striped mb-4">
 
                     {% for message in get_flashed_messages() %}
-                    
+                        {% if loop.first %}
+                            <thead>
+                        {% endif %}
                         <tr>
                             {% for i in message %}
                                 {%if loop.first %}
-                                    <th>{{i}}</th>
+                                    <th scope="col">{{i}}</th>
                                 {%else %}
                                     <td>{{i}}</td>
                                 {% endif %}
                             {% endfor %}
                         </tr>
+
+                        {% if loop.first %}
+                            </thead>
+                        {% endif %}
+
 
                     {% endfor %}
                     </table>
@@ -49,7 +56,7 @@
                 {%if session['loginInfo'] == "manager" %}
                 <a href="/managerMain" class="btn btn-lg btn-dark" act>Return to Manager Page</a>
                 {% else %}
-                <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Manager Page</a>
+                <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Stocker Page</a>
                 {% endif %}
 
             {% else %}

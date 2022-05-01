@@ -65,7 +65,7 @@ def renderFormResults(sql,modes = None,filepath = None):
 #To avoid an error of not detecting if a value is NULL (as well as to make cleaner)
 #we need to convert to explicitly null or have it with quotations
 def generateCorrectFormat(input):
-    return None if input=="" else "'" + input + "'"
+    return "Null" if input=="" else "'" + input + "'"
 
 
 
@@ -268,6 +268,7 @@ def addItemPost():
     try:
         runSQLCommand("INSERT INTO ITEM(buyPrice,sellPrice,itemName,itemDescription,location) VALUES(" + buyPrice + "," + sellPrice + "," + itemName + "," + itemDescription + "," +  location +  ");")
     except Exception as err:
+        print(err)
         mydb.rollback()
         return render_template("failure.html")
 
@@ -483,10 +484,17 @@ def loginPost():
     
     username = generateCorrectFormat(request.form["usName"])
     password = request.form["usPass"]
+    
+    #it is always required to have the error message be something for flask.  Thus, even if its correct, we need to pass some default value.
     error = None
 
-    results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID, e.ManagerID FROM EMPLOYEE e WHERE " + username + " = e.FirstName AND '" + password +"' = e.EmployeeID;")
-       
+    try:
+        results = runSQLCommand("SELECT e.FirstName, e.LastName, e.position, e.EmployeeID, e.ManagerID FROM EMPLOYEE e WHERE " + username + " = e.FirstName AND '" + password +"' = e.EmployeeID;")
+    except  TypeError:
+        error = "Please fill in all sections!"
+        return render_template("login.html",error=error)
+
+
     if(len(results) == 0):
        error = "Invalid login info! Please re-enter info"
        return render_template("login.html",error=error)
@@ -521,7 +529,7 @@ def showOrders(mode="ORDERID",filepath="showOrders"):
 def totalSales(mode="month",filepath="totalSales"):
 
     #to ensure it is easy to loop for the html, we will order the results by the month.
-    sql = "SELECT SUM(e.boughtAmount * p.sellPrice)  AS MONTHINCOME, d." + mode + "Transacted FROM receiptBought e"
+    sql = "SELECT SUM(e.boughtAmount * p.sellPrice)  AS " + mode + "income, d." + mode + "Transacted FROM receiptBought e"
     sql += " JOIN RECEIPT d ON e.ReceiptID = d.RECEIPTID JOIN item p ON p.itemID = e.itemID GROUP BY d." + mode + "Transacted ORDER BY " + mode + "Transacted ASC;"
     
     return renderFormResults(sql,modes = ["hr","day","month"],filepath=filepath)

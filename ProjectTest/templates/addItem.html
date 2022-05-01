@@ -2,7 +2,7 @@
 
 {%block content %}
         {% if session['loginInfo'] == "manager" %}
-            <u><h1>Please enter the information for an Employee.</h1></u>
+            <u><h1>Please enter the requested information</h1></u>
             <div style="padding-left: 25%; padding-right:25%">
                 <form method="post" action="{{ url_for('addItemPost') }}">
                     <div class="form-group-row">

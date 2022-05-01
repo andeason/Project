@@ -2,7 +2,7 @@
 
 {%block content %}
         {% if session['loginInfo'] == "manager" or session['loginInfo'] == "stocker" %}
-            <u><h1>Please enter the information for the receipt </h1></u>
+            <u><h1>Please enter the information for a Receipt </h1></u>
             <div style="padding-left: 25%; padding-right:25%">
                 <form method="post" action="{{ url_for('addReceiptPost') }}">
                     <div class="form-group-row">
