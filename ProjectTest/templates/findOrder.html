@@ -3,7 +3,7 @@
 {%block content %}
     <div >
         {% if session['loginInfo'] == "manager" or session['loginInfo'] == "stocker" %}
-            <u><h1>Please enter the orderID</h1></u>
+            <u><h1>Please enter the Order ID</h1></u>
             <div style="padding-left: 25%; padding-right:25%">
                 <form method="post" action="{{ url_for('findOrderPost') }}">
                     <div class="form-group-row mb-4">

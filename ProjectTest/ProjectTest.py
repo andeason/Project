@@ -92,7 +92,7 @@ def stockerMain():
 
 @app.route("/showHazardousItems")
 def hazardousItems():
-    return renderFormResults("SELECT e.itemName, h.HazardType, h.HazardInfo FROM item e JOIN hazard h ON e.itemID = h.itemID;")
+    return renderFormResults("SELECT e.itemID, e.itemName, h.HazardType, h.HazardInfo FROM item e JOIN hazard h ON e.itemID = h.itemID;")
 
 @app.route("/employeeList")
 def employeeList():
@@ -102,7 +102,7 @@ def employeeList():
 @app.route("/myManager")
 def myManager():
 
-    return renderFormResults("SELECT * FROM EMPLOYEE WHERE EmployeeID = " + str(session["managerID"]) + ";")
+    return renderFormResults("SELECT employeeID, FirstName, lastName FROM EMPLOYEE WHERE EmployeeID = " + str(session["managerID"]) + ";")
 
 @app.route("/myEmployees")
 def myEmployees():
@@ -170,7 +170,7 @@ def findItemPost():
 
     print(itemID)
     
-    return renderFormResults("SELECT * FROM ITEM WHERE itemName = " + itemName + " OR itemID = " + str(itemID) + ";")
+    return renderFormResults("select i.itemID, i.buyPrice, i.sellPrice, i.itemName, i.itemDescription, i.location, COALESCE(a.BOUGHTAMOUNT,0) - COALESCE(b.SOLDAMOUNT,0) as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID WHERE i.itemName = " + itemName + " OR i.itemID = " + str(itemID) + ";")
 
 
 @app.route("/addReceipt")
@@ -204,11 +204,11 @@ def addReceiptPost():
             itemID = request.form["itemID-" + str(i)]
             boughtAmount = request.form["boughtAmount-" + str(i)]
 
-            #To my knowledge, the easiest way is to do a select to see.  Otherwise, we would need to create a trigger, which seems costly and a bad idea.
-            #Maybe change if we have time?
+
             result = runSQLCommand("select COALESCE(a.BOUGHTAMOUNT,0) - COALESCE(b.SOLDAMOUNT,0) as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID WHERE i.itemID = " + str(itemID) +  ";")
             
-            #This isnt the prettiest.  Should change later?
+            #We need to verify that the result for the quantity is in fact correct.
+            #Since getting the sum is difficult with a check, we instead opt in with getting it via an SQL command first
             if(int(result[0][0]) - int(boughtAmount) >= 0):
                 runSQLCommand("INSERT INTO receiptBought(receiptID,itemID,boughtAmount) SELECT LAST_INSERT_ID() , " + itemID + " , " + boughtAmount + ";")
             else:
@@ -297,7 +297,13 @@ def removeEmployeePost():
         return render_template("failure.html")
 
     mydb.commit()
-    return render_template("success.html")
+
+    #A query can be correct, but nothing is removed because the entry doesnt exist.
+    #Here, we display that by showing it as a failure.  
+    if(cursor.rowcount != 0):
+        return render_template("success.html")
+    else:
+        return render_template("failure.html")
 
 
 @app.route("/addOrder")
