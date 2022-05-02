@@ -33,7 +33,7 @@ CREATE TABLE HAZARD(
     HazardType varChar(40) NOT NULL,
     HazardInfo varChar(100) NOT NULL,
     
-    PRIMARY KEY(HazardType),
+    PRIMARY KEY(HazardType,itemID),
     FOREIGN KEY(itemID) REFERENCES ITEM(itemID)
 	ON UPDATE CASCADE ON DELETE CASCADE
 );
