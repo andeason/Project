@@ -1,6 +1,5 @@
 import mysql.connector
-from flask import Flask, render_template,request,redirect, session,flash,jsonify
-import re
+from flask import Flask, render_template,request,redirect, session,flash
 
 
 mydb = None
@@ -128,7 +127,7 @@ def findEmployees():
 
 @app.route("/findMyItems")
 def findMyItems():
-    return renderFormResults("SELECT * FROM ITEM WHERE location IN (SELECT workLocation FROM EMPLOYEE WHERE EmployeeID= " + str(session["employeeID"]) + ");")
+    return renderFormResults("select i.itemID, i.buyPrice, i.sellPrice, i.itemName, i.itemDescription, i.location, COALESCE(a.BOUGHTAMOUNT,0) - COALESCE(b.SOLDAMOUNT,0) as quantity FROM item i LEFT JOIN (SELECT itemID, SUM(orderAmount) as BOUGHTAMOUNT FROM itemOrder GROUP BY itemID) a ON a.itemID = i.itemID LEFT JOIN  (SELECT itemID, SUM(boughtAmount) as SOLDAMOUNT FROM ReceiptBought GROUP BY itemID) b ON b.itemID = i.itemID WHERE location IN (SELECT workLocation FROM EMPLOYEE WHERE EmployeeID= " + str(session["employeeID"]) + ");")
 
 @app.route("/findMyInformation")
 def findMyInformation():
@@ -353,11 +352,12 @@ def alterEmployee():
 
 
 
+
 def setupAlterSQL(dictionary):
 
     strings = []
     for key, value in dictionary.items():
-        if value != None:
+        if value != None and value != "Null":
             strings.append(key + " = " + value)
 
     return ', '.join(strings)
@@ -371,7 +371,6 @@ def alterEmployeePost():
     employeeID = request.form["employeeID"]
 
 
-    #PURE ENERGY
     alters = {}
 
 
@@ -397,7 +396,7 @@ def alterEmployeePost():
     if(cursor.rowcount != 0):
         return render_template("success.html")
     else:
-        return render_template("failure.html")
+        return render_template("nullchanges.html")
 
 @app.route("/alterItem")
 def alterItem():
@@ -409,7 +408,6 @@ def alterItemPost():
 
 
     itemID = request.form["itemID"]
-    #PURE ENERGY
     alters = {}
 
 
@@ -437,8 +435,28 @@ def alterItemPost():
     if(cursor.rowcount != 0):
         return render_template("success.html")
     else:
+        return render_template("nullchanges.html")
+
+@app.route("/addHazard")
+def addHazard():
+    return render_template("addHazard.html")
+
+@app.route("/addHazardPost",methods=["POST"])
+def addHazardPost():
+
+    itemID = generateCorrectFormat(request.form["itemID"])
+    hazardType = generateCorrectFormat(request.form["hazardType"])
+    hazardInfo = generateCorrectFormat(request.form["hazardInfo"])
+
+    try:
+        runSQLCommand("INSERT INTO hazard(itemID,hazardType,hazardInfo) VALUES(" + itemID + "," + hazardType + "," + hazardInfo + ");")
+    except Exception as err:
+        mydb.rollback()
         return render_template("failure.html")
 
+    print("Committing")
+    mydb.commit()
+    return render_template("success.html")
 
 
     

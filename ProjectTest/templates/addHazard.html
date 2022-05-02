@@ -1,0 +1,42 @@
+{%extends "base.html" %}
+
+{%block content %}
+        {% if session['loginInfo'] == "manager" %}
+            <u><h1>Please enter the information for an Employee.</h1></u>
+            <div style="padding-left: 25%; padding-right:25%">
+                <form method="post" action="{{ url_for('addHazardPost') }}">
+                    <div class="form-group-row">
+                        <label for="itemID">item ID</label>
+                        <input type="itemID" class="form-control" name="itemID">
+
+                    </div>
+                    <div class="form-group-row">
+                        <label for="hazardType">Hazard Type</label>
+                        <input type="hazardType" class="form-control" name="hazardType" >
+
+                    </div>
+
+                    <div class="form-group-row">
+                        <label for="hazardInfo">Hazard Description</label>
+                        <input type="hazardInfo" class="form-control" name="hazardInfo" >
+                    </div>
+
+
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+            </div>
+
+
+
+        {% else %}
+        <h1>Access Denied</h1>
+
+        <p>Please return to your page.</p>
+        {% if session['loginInfo'] == "stocker" %}
+            <a href="/stockerMain" class="btn btn-lg btn-dark" act>Return to Stocker Page</a>
+        {% else %}
+            <a href="/" class="btn btn-lg btn-dark" act>Return to Main</a>
+        {% endif %}
+        {% endif %}
+
+{% endblock %}
