@@ -483,7 +483,7 @@ def findOrderPost():
     except ValueError:
         orderID = -1
 
-    return renderFormResults("SELECT r.orderID, r.hrTransacted, r.dayTransacted, r.monthTransacted, b.itemID, b.orderAmount, i.itemName, b.orderAmount * i.sellPrice as TOTALCOST FROM orders r join itemOrder b on r.orderID = b.orderID JOIN item i ON b.itemID = i.itemID WHERE r.orderID = " + str(orderID) + ";")    
+    return renderFormResults("SELECT r.orderID, r.hrTransacted, r.dayTransacted, r.monthTransacted, b.itemID, b.orderAmount, i.itemName, b.orderAmount * i.buyPrice as TOTALCOST FROM orders r join itemOrder b on r.orderID = b.orderID JOIN item i ON b.itemID = i.itemID WHERE r.orderID = " + str(orderID) + ";")    
 
 @app.route("/findReceipt")
 def findreceipt():
